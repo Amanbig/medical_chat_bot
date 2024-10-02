@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -23,7 +24,7 @@ const Menu = () => {
       <div className="text-lg font-bold">MedBot</div>
 
       {/* Hamburger menu for mobile */}
-      <div className="xl:hidden">
+      <div className="flex xl:hidden">
         <Button variant="ghost" onClick={toggleMobileMenu}>
           {isMobileMenuOpen ? <Cross1Icon size={24} /> : <MenuIcon size={24} />}
         </Button>
@@ -50,30 +51,38 @@ const Menu = () => {
         </NavigationMenuList>
       </NavigationMenu>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-black shadow-lg xl:hidden z-50">
-          <NavigationMenu>
-            <NavigationMenuList className="flex flex-col space-y-2 p-4">
-              <NavigationMenuItem>
-                <Button variant="link" onClick={toggleMobileMenu}><Link href="/">Overview</Link></Button>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Button variant="link" onClick={toggleMobileMenu}><Link href="/team">Team</Link></Button>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Button variant="link" onClick={toggleMobileMenu}><Link href="/enterprise">Enterprise</Link></Button>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Button variant="link" onClick={toggleMobileMenu}><Link href="/education">Education</Link></Button>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Button variant="link" onClick={toggleMobileMenu}><Link href="/pricing">Pricing</Link></Button>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
-      )}
+      {/* Mobile menu with animations */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            className="absolute top-16 left-0 right-0 bg-black shadow-lg xl:hidden z-50"
+            initial={{ opacity: 0, y: -20 }} // Start above
+            animate={{ opacity: 1, y: 0 }} // Slide in
+            exit={{ opacity: 0, y: -20 }} // Slide out
+            transition={{ duration: 0.3 }} // Animation duration
+          >
+            <NavigationMenu>
+              <NavigationMenuList className="flex flex-col space-y-2 p-4">
+                <NavigationMenuItem>
+                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/">Overview</Link></Button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/team">Team</Link></Button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/enterprise">Enterprise</Link></Button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/education">Education</Link></Button>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/pricing">Pricing</Link></Button>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
