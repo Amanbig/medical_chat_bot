@@ -48,11 +48,11 @@ export default function CardSlider({ direction = "left" }) { // Add 'direction' 
           >
             <Card>
               <CardHeader>
-                <CardTitle>{card.title}</CardTitle>
+                <CardTitle>{card.description}</CardTitle>
               </CardHeader>
-              <CardFooter>
+              {/* <CardFooter>
                 <p className="text-gray-600 mt-2">{card.description}</p>
-              </CardFooter>
+              </CardFooter> */}
             </Card>
           </motion.div>
         ))}

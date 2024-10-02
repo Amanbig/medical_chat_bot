@@ -1,30 +1,111 @@
+"use client";
+
 import CardSlider from "@/components/parts/CardSlider";
 import MainCard from "@/components/parts/MainCard";
+import PricingCards from "@/components/parts/PricingCards";
 import Questions from "@/components/parts/questions";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Home() {
   return (
-    <div className="">
+    <div>
       <main className="flex flex-col justify-center text-center">
-        {/* <Button>Get Started</Button> */}
-        <MainCard />
+        {/* Main Card with Animation */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <MainCard />
+        </motion.div>
+
         {/* First slider moves to the left */}
-        <CardSlider direction="left" />
+        <motion.div
+          initial={{ opacity: 0, x: -100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <CardSlider direction="left" />
+        </motion.div>
+
         {/* Second slider moves to the right */}
-        <CardSlider direction="right" />
-        
+        <motion.div
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <CardSlider direction="right" />
+        </motion.div>
 
-        <MainCard />
+        {/* Section for Writing with MedBot */}
+        <motion.div
+          className='pt-20 pb-20 m-3 flex flex-col text-center justify-center'
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <div className='p-2 text-5xl'>
+            <div>Writes, brainstorms, edits,</div>
+            <div>and explores ideas with you</div>
+          </div>
+          <div className='p-2 gap-2'>
+            <Button variant="link">Learn more about writing with MedBot {'>'}</Button>
+          </div>
+          <motion.div
+            className="p-4 flex justify-center text-center rounded-3xl"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.05 }} // Scale effect on hover
+          >
+            <Image src="/image.png" className="w-[80%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
+          </motion.div>
+        </motion.div>
 
-        <MainCard />
+        {/* Section for Productivity Insights */}
+        <motion.div
+          className='pt-20 pb-20 m-3 flex flex-col text-center justify-center'
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
+          <div className='p-2 text-5xl'>
+            <div>Summarize meetings. Find new</div>
+            <div>insights. Increase productivity.</div>
+          </div>
+          <motion.div
+            className="p-4 flex justify-center text-center rounded-3xl"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.05 }} // Scale effect on hover
+          >
+            <Image src="/image2.png" className="w-[80%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
+          </motion.div>
+        </motion.div>
 
-        <div className="p-4 flex justify-center text-center">
-            <div className="w-[60%]">
-                <Questions/>
-            </div>
-      </div>
+        {/* Pricing Cards with Animation */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1.0 }}
+        >
+          <PricingCards />
+        </motion.div>
+
+        {/* Questions Section */}
+        <motion.div
+          className="p-4 flex justify-center text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1.2 }}
+        >
+          <div className="w-[60%]">
+            <Questions />
+          </div>
+        </motion.div>
       </main>
     </div>
   );

@@ -11,7 +11,7 @@ export default function MainCard() {
         <div> Be more productive.</div>
         </div>
         <div className='p-3 text-xl'>
-        <div>Free to use. Easy to try. Just ask and ChatGPT can</div>
+        <div>Free to use. Easy to try. Just ask and MedBot can</div>
         <div>help with writing, learning, brainstorming, and more.</div>
         </div>
         <div className='p-2 gap-2'>
