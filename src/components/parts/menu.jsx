@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from 'react';
 import {
@@ -19,7 +19,7 @@ const Menu = () => {
   };
 
   return (
-    <div className="p-4 flex justify-between items-center shadow-lg xl:px-10 border-3 border-gray-600 xl:border-none">
+    <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center shadow-lg xl:px-10 border-b-3 border-gray-600 xl:border-none z-50 bg-black">
       <div className="text-lg font-bold">MedBot</div>
 
       {/* Hamburger menu for mobile */}
@@ -52,7 +52,7 @@ const Menu = () => {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-gray-950 shadow-lg xl:hidden">
+        <div className="absolute top-16 left-0 right-0 bg-black shadow-lg xl:hidden z-50">
           <NavigationMenu>
             <NavigationMenuList className="flex flex-col space-y-2 p-4">
               <NavigationMenuItem>
@@ -76,6 +76,6 @@ const Menu = () => {
       )}
     </div>
   );
-}
+};
 
 export default Menu;
