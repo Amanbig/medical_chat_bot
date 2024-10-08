@@ -21,7 +21,7 @@ const Menu = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center shadow-lg xl:px-10 border-b-3 border-gray-600 xl:border-none z-50 bg-black">
-      <div className="text-lg font-bold">MedBot</div>
+      <div className="text-lg font-bold">RAG Q&A</div>
 
       {/* Hamburger menu for mobile */}
       <div className="flex xl:hidden">

@@ -16,10 +16,10 @@ function PricingCards() {
     return (
         <div className='pt-20 pb-20 m-3 flex flex-col text-center justify-center'>
             <div className='p-2 text-5xl'>
-                <div>Get started with MedBot today</div>
+                <div>Get started with RAG Q&A today</div>
             </div>
             <div className='p-2 gap-2'>
-                <Button variant="link">Learn more about MedBot {'>'}</Button>
+                <Button variant="link">Learn more about RAG Q&A {'>'}</Button>
             </div>
             <div className='flex justify-center text-center p-2'>
                 <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 justify-center'>

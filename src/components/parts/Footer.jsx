@@ -9,7 +9,7 @@ export default function Footer() {
     <footer className=" text-gray-200 py-10 border-t-2 border-gray-800 bg-gray-950">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-start px-4">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold mb-2">MedBot</h2>
+          <h2 className="text-2xl font-bold mb-2">RAG Q&A</h2>
           <p className="text-sm mb-4">Your tagline or description goes here. Making the world a better place.</p>
           <div className="flex space-x-4">
             <a href="#" className="text-gray-400 hover:text-white" aria-label="Facebook">
@@ -63,7 +63,7 @@ export default function Footer() {
       </div>
 
       <div className="text-center border-t border-gray-800 pt-6">
-        <p className="text-sm">&copy; {new Date().getFullYear()} Medbot. All rights reserved.</p>
+        <p className="text-sm">&copy; {new Date().getFullYear()} RAG Q&A. All rights reserved.</p>
       </div>
     </footer>
   );

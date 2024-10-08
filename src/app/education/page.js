@@ -23,17 +23,17 @@ export default function EducationPage() {
       description: "Explore the world of NLP and its applications.",
     },
     {
-      title: "Building Applications with MedBot",
-      description: "Get hands-on experience in building applications using MedBot.",
+      title: "Building Applications with RAG Q&A",
+      description: "Get hands-on experience in building applications using RAG Q&A.",
     },
     {
-        title: "Building Applications with MedBot",
-        description: "Get hands-on experience in building applications using MedBot.",
+        title: "Building Applications with RAG Q&A",
+        description: "Get hands-on experience in building applications using RAG Q&A.",
       },
   ];
 
   return (
-    <div className="flex flex-col justify-center items-center text-center p-10">
+    <div className="flex flex-col justify-center items-center text-center p-10 mt-10">
       <motion.h1 
         className="text-5xl font-bold mb-6"
         initial={{ opacity: 0, y: -20 }} 

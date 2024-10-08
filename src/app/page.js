@@ -39,7 +39,7 @@ export default function Home() {
           <CardSlider direction="right" />
         </motion.div>
 
-        {/* Section for Writing with MedBot */}
+        {/* Section for Writing with RAG Q&A */}
         <motion.div
           className='pt-20 pb-20 m-3 flex flex-col text-center justify-center'
           initial={{ opacity: 0, y: 20 }}
@@ -51,7 +51,7 @@ export default function Home() {
             <div>and explores ideas with you</div>
           </div>
           <div className='p-2 gap-2'>
-            <Button variant="link">Learn more about writing with MedBot {'>'}</Button>
+            <Button variant="link">Learn more about writing with ChatBot {'>'}</Button>
           </div>
           <motion.div
             className="p-4 flex justify-center text-center rounded-3xl"
@@ -60,7 +60,7 @@ export default function Home() {
             transition={{ duration: 0.3 }}
             whileHover={{ scale: 1.05 }} // Scale effect on hover
           >
-            <Image src="/image.png" className="w-[80%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
+            <Image src="/image.png" className="w-[60%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
           </motion.div>
         </motion.div>
 
@@ -82,7 +82,7 @@ export default function Home() {
             transition={{ duration: 0.3 }}
             whileHover={{ scale: 1.05 }} // Scale effect on hover
           >
-            <Image src="/image2.png" className="w-[80%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
+            <Image src="/image2.png" className="w-[60%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
           </motion.div>
         </motion.div>
 

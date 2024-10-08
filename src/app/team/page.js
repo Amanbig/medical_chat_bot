@@ -16,7 +16,7 @@ export default function TeamPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="p-2 text-5xl">
-            <div>Meet the Team Behind MedBot</div>
+            <div>Meet the Team Behind RAG Q&A</div>
           </div>
           <div className="p-2 gap-2">
             <Button variant="link">Join us and learn more about the team {'>'}</Button>
@@ -53,7 +53,7 @@ export default function TeamPage() {
               <TeamMemberCard
                 name="Ujjwal Chopra"
                 role="Backend"
-                bio="Bob leads the technical team and ensures MedBot stays ahead with cutting-edge technology."
+                bio="Bob leads the technical team and ensures RAG Q&A stays ahead with cutting-edge technology."
                 image="/team/team_member2.png"
               />
             </motion.div>

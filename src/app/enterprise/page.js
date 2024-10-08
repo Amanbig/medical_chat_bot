@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 export default function EnterprisePage() {
   return (
-    <div className="flex flex-col justify-center items-center text-center p-10">
+    <div className="flex flex-col justify-center items-center text-center p-10 mt-10">
       {/* Animated Heading */}
       <motion.h1
         className="text-5xl font-bold mb-6"

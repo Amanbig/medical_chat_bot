@@ -10,11 +10,11 @@ export default function CardSlider({ direction = "left" }) { // Add 'direction' 
   
   // Duplicate the card list to ensure continuous flow
   const cards = [
-    { id: 1, title: "Card 1", description: "This is card 1", image: "https://via.placeholder.com/300x200" },
-    { id: 2, title: "Card 2", description: "This is card 2", image: "https://via.placeholder.com/300x200" },
-    { id: 3, title: "Card 3", description: "This is card 3", image: "https://via.placeholder.com/300x200" },
-    { id: 4, title: "Card 4", description: "This is card 4", image: "https://via.placeholder.com/300x200" },
-    { id: 5, title: "Card 5", description: "This is card 5", image: "https://via.placeholder.com/300x200" },
+    { id: 1, title: "Card 1", description: "Answering FAQs" },
+    { id: 2, title: "Card 2", description: "Providing weather updates"},
+    { id: 3, title: "Card 3", description: "Sharing news or latest articles"},
+    { id: 4, title: "Card 4", description: "Giving product information" },
+    { id: 5, title: "Card 5", description: "Helping with note-taking" },
   ];
   const duplicatedCards = [...cards, ...cards]; // Duplicate for seamless scrolling
 
