@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ArrowTopRightIcon } from '@radix-ui/react-icons';
+import Link from 'next/link';
 
 function PricingCards() {
     return (
@@ -40,7 +41,9 @@ function PricingCards() {
                         <CardFooter className="flex flex-col items-center">
                             <p className="text-2xl font-bold">$0</p>
                             <p className="text-sm text-muted-foreground">/ month</p>
+                            <Link href="/chatbot">
                             <Button variant="default" className="mt-4 rounded-full">Get Started <ArrowTopRightIcon /></Button>
+                            </Link>
                         </CardFooter>
                     </Card>
 
@@ -64,7 +67,9 @@ function PricingCards() {
                             <p className="text-2xl font-bold">$20</p>
                             <p className="text-sm text-muted-foreground">/ month</p>
                             <div className='flex flex-row gap-3'>
+                                <Link href="/chatbot">
                                 <Button variant="default" className="mt-4 rounded-full">Get Started <ArrowTopRightIcon /></Button>
+                                </Link>
                                 <Button variant="link" className="mt-4">Limits Apply {'>'}</Button>
                             </div>
                         </CardFooter>

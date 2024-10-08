@@ -1,6 +1,7 @@
 import React from 'react'
 import { Button } from '../ui/button'
-import { ArrowBigDownIcon, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 export default function MainCard() {
   return (
@@ -15,7 +16,9 @@ export default function MainCard() {
         <div>help with writing, learning, brainstorming, and more.</div>
         </div>
         <div className='p-2 gap-2'>
-            <Button>Start Now <ArrowRight/></Button>
+          <Link href="/chatbot">
+          <Button>Start Now <ArrowRight/></Button>
+          </Link>
             {/* <Button variant="link">Download Now <ArrowBigDownIcon/></Button> */}
         </div>
     </div>
