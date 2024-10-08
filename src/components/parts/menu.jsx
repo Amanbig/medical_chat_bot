@@ -11,6 +11,7 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { MenuIcon } from 'lucide-react';
+import { ModeToggle } from './Themes';
 
 const Menu = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,7 +21,7 @@ const Menu = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center shadow-lg xl:px-10 border-b-3 border-gray-600 xl:border-none z-50 bg-black">
+    <div className="fixed top-0 left-0 right-0 p-4 flex justify-between items-center shadow-lg xl:px-10 border-b-3 border-gray-600 xl:border-none z-50 bg-inherit">
       <div className="text-lg font-bold">RAG Q&A</div>
 
       {/* Hamburger menu for mobile */}
@@ -46,7 +47,8 @@ const Menu = () => {
             <Button variant="link"><Link href="/education">Education</Link></Button>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Button variant="link"><Link href="/pricing">Pricing</Link></Button>
+            {/* <Button variant="link"><Link href="/pricing">Pricing</Link></Button> */}
+            <ModeToggle/>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

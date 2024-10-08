@@ -39,7 +39,7 @@ export default function TeamPage() {
             >
               <TeamMemberCard
                 name="Amanpreet Singh"
-                role="Frontend"
+                role="Frontend & Backend"
                 bio="Alice has over 10 years of experience in AI and is passionate about bringing AI solutions to businesses."
                 image="/team/team_member1.jpg"  // Ensure images are placed in the public/team directory
               />

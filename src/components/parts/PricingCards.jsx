@@ -24,7 +24,7 @@ function PricingCards() {
             <div className='flex justify-center text-center p-2'>
                 <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 justify-center'>
                     {/* Free Tier Pricing Card */}
-                    <Card className="w-full max-w-sm mx-auto bg-gray-950">
+                    <Card className="w-full max-w-sm mx-auto bg-inherit">
                         <CardHeader>
                             <CardTitle>Free</CardTitle>
                         </CardHeader>
@@ -45,7 +45,7 @@ function PricingCards() {
                     </Card>
 
                     {/* Plus Tier Pricing Card */}
-                    <Card className="w-full max-w-sm mx-auto bg-gray-950">
+                    <Card className="w-full max-w-sm mx-auto bg-inherit">
                         <CardHeader>
                             <CardTitle>Plus</CardTitle>
                         </CardHeader>

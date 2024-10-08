@@ -46,7 +46,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <div className='p-2 text-5xl'>
+          <div className='p-2 text-3xl xl:text-5xl'>
             <div>Writes, brainstorms, edits,</div>
             <div>and explores ideas with you</div>
           </div>
@@ -71,7 +71,7 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
         >
-          <div className='p-2 text-5xl'>
+          <div className='p-2 text-3xl xl:text-5xl'>
             <div>Summarize meetings. Find new</div>
             <div>insights. Increase productivity.</div>
           </div>
