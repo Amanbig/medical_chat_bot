@@ -10,7 +10,7 @@ export default function Footer() {
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-start px-4">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">RAG Q&A</h2>
-          <p className="text-sm mb-4">Your tagline or description goes here. Making the world a better place.</p>
+          <p className="text-sm mb-4">Chatbots can be custom-built to suit various industries and use cases—from customer service and sales to entertainment and education.</p>
           <div className="flex space-x-4">
             <a href="#" className="text-gray-400 hover:text-white" aria-label="Facebook">
               <FacebookIcon />
