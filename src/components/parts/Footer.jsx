@@ -6,7 +6,7 @@ import { FacebookIcon, GithubIcon, LinkedinIcon, TwitterIcon } from "lucide-reac
 
 export default function Footer() {
   return (
-    <footer className=" text-gray-200 py-10 border-t-2 border-gray-800 bg-gray-950">
+    <footer className=" py-10 border-t-4">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-start px-4">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">RAG Q&A</h2>
