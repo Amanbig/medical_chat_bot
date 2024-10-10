@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ChatBot with AI LLM Bot with File Upload
 
-## Getting Started
+A modern web application that integrates a conversational AI chatbot with real-time user interactions, including file uploads and smooth animations. Built using **React**, **Framer Motion**, **Lucide Icons**, and **ShadCN Components**.
 
-First, run the development server:
+## Features
 
+- **Conversational AI Chatbot**: Engage with an AI chatbot that can answer user queries in real-time.
+- **Animated Message Flow**: Smooth animations using Framer Motion to provide a modern user experience.
+- **User Message Input**: Simple input field for sending messages with an `Enter` key or button click.
+- **AI Response Handling**: AI answers user queries through an external API.
+- **File Upload System**: Upload PDF files directly from the UI, with success/error notifications.
+- **Lucide Icons Integration**: Modern icons for a clean and functional UI.
+- **ShadCN Components**: Highly customizable and reusable UI components for a consistent interface.
+
+## Tech Stack
+
+- **Frontend**:
+  - React (Next.js)
+  - Framer Motion
+  - Axios (for API requests)
+  - Lucide Icons
+  - ShadCN UI components
+  - Tailwind CSS
+- **Backend**:
+  - Flask (API for chatbot and file upload functionality)
+- **Others**:
+  - File Upload with Fetch API
+  - Notifications with React Toastify
+
+## Installation
+### Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Amanbig/medical_chat_bot.git
+cd medical_chat_bot
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Frontend Setup
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+#### Install dependencies:
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+#### Start the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+### Backend Setup
 
-To learn more about Next.js, take a look at the following resources:
+#### Move to backend directory
+```bash
+cd backend
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Create a .env File
+Create a .env file in the directory and copy the following lines:
+```bash
+GROQ_API_KEY = "<groqapi-key>"
+HF_TOKEN = "<hf-token>"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+#### Create a Virtual Environment
+```bash
+python -m venv venv
+source venv/bin/activate  
+```
 
-## Deploy on Vercel
+#### Install Required Packages
+```bash
+pip install -r requirements.txt
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Run the application
+```bash
+python main.py
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Usage
+- **Chat with AI**: Enter your query in the input box and press Enter or click the send button to receive an AI response.
+- **Upload Files**: Click the "Upload PDF" button, select a file, and it will be uploaded to the server.
+- **Responsive UI**: The app is responsive and works on mobile and desktop devices.
+
+## API Endpoints
+- **POST /ask**: Handles user queries and returns AI-generated responses.
+- **POST /upload**: Handles file uploads (accepts PDF files).
+
+## Customization
+- Modify the chatbot behavior by updating the Flask API in backend/app.py.
+- Adjust the animations or UI components using Framer Motion and ShadCN components.
+
+## Contributing
+
+1. **Fork the repository** on GitHub.
+2. **Create a new branch** (`git checkout -b feature/YourFeature`).
+3. **Make your changes** and commit (`git commit -am 'Add new feature'`).
+4. **Push to the branch** (`git push origin feature/YourFeature`).
+5. **Create a new Pull Request for the changes made**.
