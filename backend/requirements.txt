@@ -10,3 +10,4 @@ langchain_groq
 watchdog
 flask
 flask_cors
+dotenv
