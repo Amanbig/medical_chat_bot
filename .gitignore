@@ -7,7 +7,6 @@
 .yarn/install-state.gz
 
 venv/
-chroma_db/
 # testing
 /coverage
 
