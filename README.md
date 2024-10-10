@@ -56,8 +56,8 @@ cd backend
 #### Create a .env File
 Create a .env file in the directory and copy the following lines:
 ```bash
-GROQ_API_KEY = "<groqapi-key>"
-HF_TOKEN = "<hf-token>"
+GROQ_API_KEY="<groqapi-key>"
+HF_TOKEN="<hf-token>"
 ```
 
 #### Create a Virtual Environment
