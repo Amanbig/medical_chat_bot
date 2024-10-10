@@ -6,6 +6,7 @@ import axios from "axios";
 import { Button } from "../ui/button";
 import { ArrowRight, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 // Create ChatContext to handle state
 const ChatContext = createContext();
@@ -31,16 +32,16 @@ const ChatBot = () => {
             )}
           </AnimatePresence>
         </div>
-        {!showAiBot &&
-        <motion.div
-          className="flex-1 overflow-y-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <ChatList />
-        </motion.div>
-        }
+        {!showAiBot && (
+          <motion.div
+            className="flex-1 overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ChatList />
+          </motion.div>
+        )}
         <div>
           <UserBar />
         </div>
@@ -58,9 +59,13 @@ const ChatList = () => {
       {chats.map((chat, index) => (
         <motion.div
           key={index}
-          className={`flex ${chat.from === "user" ? "justify-end" : "justify-start"} mb-4`}
-          initial={chat.from === "user" ? { opacity: 0, x: 100 } : { opacity: 0, scale: 0 }}
-          animate={chat.from === "user" ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1 }}
+          className={`flex m-8 ${chat.from === "user" ? "justify-end" : "justify-start"}`}
+          initial={
+            chat.from === "user" ? { opacity: 0, x: 100 } : { opacity: 0, scale: 0 }
+          }
+          animate={
+            chat.from === "user" ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1 }
+          }
           transition={{
             type: "spring",
             stiffness: 120,
@@ -68,20 +73,29 @@ const ChatList = () => {
           }}
         >
           <div
-            className={`max-w-xs shadow-lg shadow-gray-600 rounded-xl p-4 ${
+            className={`${
+              chat.from === "user" ? "max-w-xs w-full" : "w-full"
+            } shadow-lg shadow-gray-600 rounded-xl p-2 ${
               chat.from === "user"
-                ? "text-right bg-blue-500 dark:bg-blue-700"
-                : "text-left bg-cyan-500 dark:bg-teal-600"
+                ? "text-right bg-gray-700 dark:bg-gray-800"
+                : "text-left bg-gray-700 dark:bg-gray-800"
             }`}
           >
-            <p className="text-white font-bold dark:text-white">{chat.value}</p>
-            <p className="text-xs text-white dark:text-gray-300">{chat.from}</p>
+            <p className={`text-white dark:text-white p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
+              {chat.value}
+            </p>
+            <Badge className="rounded-full">
+              {chat.from}
+            </Badge>
           </div>
         </motion.div>
       ))}
     </div>
   );
 };
+
+
+
 
 // UserBar for sending messages
 const UserBar = () => {
@@ -92,25 +106,20 @@ const UserBar = () => {
   const handlePredict = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/predicts", { value });
-      // Ensure response.data.prediction is a valid value
-      const aiMessage = response.data.prediction || "Sorry, I couldn't respond.";
-      setChats((prevChats) => [
-        ...prevChats,
-        { value: aiMessage, from: "ai" },
-      ]);
+      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value });
+      const aiMessage = response.data.answer || "Sorry, I couldn't respond.";
+      
+      setChats((prevChats) => [...prevChats, { value: aiMessage, from: "AI Bot" }]);
     } catch (error) {
-      console.error("Error:", error);
-      // Fallback in case of an error
+      console.error("Error:", error.response ? error.response.data : error.message);
       setChats((prevChats) => [
         ...prevChats,
-        { value: "Sorry, there was an error processing your request.", from: "ai" },
+        { value: "Sorry, there was an error processing your request.", from: "AI Bot" },
       ]);
     } finally {
       setLoading(false);
     }
   };
-  
 
   const handleSendMessage = () => {
     if (value) {
@@ -123,7 +132,6 @@ const UserBar = () => {
   return (
     <div className="p-4">
       <div className="flex justify-center text-center gap-2">
-        {/* Use ShadCN Input */}
         <Input
           type="text"
           placeholder="Type your message..."
@@ -133,7 +141,6 @@ const UserBar = () => {
           disabled={loading}
           className="flex-grow transition-all duration-150 ease-in-out border-4 p-4"
         />
-
         <div className="rounded-full">
           {!loading ? (
             <Button
@@ -153,37 +160,36 @@ const UserBar = () => {
   );
 };
 
+
+// AI Bot with typing animation
 const AiBot = () => {
-    const [displayedText, setDisplayedText] = useState("");
-    const fullText = "Hoow may I help you?";
-  
-    useEffect(() => {
-      let currentIndex = 0;
-      const typingInterval = setInterval(() => {
-        // Check if the current index is less than the full text length
-        if (currentIndex < fullText.length-1) {
-          setDisplayedText((prev) => prev + fullText[currentIndex]);
-          currentIndex++;
-        } else {
-          clearInterval(typingInterval);
-        }
-      }, 100); // Typing speed
-  
-      return () => clearInterval(typingInterval); // Cleanup interval
-    }, []);
-  
-    return (
-      <motion.div
-        className="flex justify-center items-center h-full text-2xl font-bold text-gray-700 dark:text-gray-300"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        {displayedText}
-      </motion.div>
-    );
-  };
-    
-  
+  const [displayedText, setDisplayedText] = useState("");
+  const fullText = "How may I help you?";
+
+  useEffect(() => {
+    let currentIndex = 0;
+    const typingInterval = setInterval(() => {
+      if (currentIndex < fullText.length - 1) {
+        setDisplayedText((prev) => prev + fullText[currentIndex]);
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 100);
+
+    return () => clearInterval(typingInterval);
+  }, []);
+
+  return (
+    <motion.div
+      className="flex justify-center items-center h-full text-2xl font-bold text-gray-700 dark:text-gray-300"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {displayedText}
+    </motion.div>
+  );
+};
 
 export default ChatBot;
