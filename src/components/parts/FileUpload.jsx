@@ -14,11 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from 'react-toastify';
 import { Loader } from "lucide-react";
+import { useSession } from "../SessionContext";
 
 export default function FileUploadDialog({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [isOpen, setIsOpen] = useState(true); // Open dialog by default
   const [isUpload, setIsUpload] = useState(false);
+  const {session,setSession} = useSession()
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]); // Set the selected file
@@ -32,6 +34,10 @@ export default function FileUploadDialog({ onUploadSuccess }) {
     const formData = new FormData();
     formData.append("file", file); // Prepare the form data for upload
 
+    if (session) {
+      formData.append("session_id", session); // Send the session ID if available
+    }
+
     try {
       const response = await fetch("http://127.0.0.1:5000/upload", {
         method: "POST",
@@ -43,7 +49,7 @@ export default function FileUploadDialog({ onUploadSuccess }) {
       if (!response.ok) {
         throw new Error(data.message || "Upload failed"); // Handle response errors
       }
-
+      setSession(data['session_id'])
       toast.success("File uploaded successfully!"); // Notify user of success
       setFile(null); // Clear the file input
       onUploadSuccess(); // Call the success callback

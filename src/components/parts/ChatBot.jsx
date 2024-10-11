@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { ArrowRight, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useSession } from "../SessionContext";
 
 // Create ChatContext to handle state
 const ChatContext = createContext();
@@ -102,11 +103,12 @@ const UserBar = () => {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const { chats, setChats } = useContext(ChatContext);
+  const {session} = useSession();
 
   const handlePredict = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value });
+      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value,session_id: session });
       const aiMessage = response.data.answer || "Sorry, I couldn't respond.";
       
       setChats((prevChats) => [...prevChats, { value: aiMessage, from: "AI Bot" }]);

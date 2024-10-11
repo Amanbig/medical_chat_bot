@@ -48,10 +48,13 @@ def upload_pdf():
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
-    uploaded_files = request.files.getlist('file')
-    session_id = "default"
-    chat_histories[session_id] = ChatMessageHistory()  # Initialize chat history
+    # session_id = "default"
+    session_id = request.form.get('session_id') or str(uuid.uuid4())
+    if session_id not in chat_histories:
+        chat_histories[session_id] = ChatMessageHistory()
 
+    uploaded_files = request.files.getlist('file')
+    
     documents = []
     for uploaded_file in uploaded_files:
         # Handle only PDF files
@@ -86,7 +89,7 @@ def upload_pdf():
 @app.route('/ask', methods=['POST'])
 def ask_question():
     data = request.get_json()
-    session_id = 'default'
+    session_id = data.get('session_id')
     user_input = data.get('question')
 
     if not user_input:
