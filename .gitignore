@@ -13,6 +13,8 @@ venv/
 # Ignore Chroma persisted embeddings
 chroma_persist/
 
+*.pdf
+
 # next.js
 /.next/
 /out/
