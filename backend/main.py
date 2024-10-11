@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 import os
 import uuid
 from flask_cors import CORS
+import logging
 
 # Load environment variables from .env file
 load_dotenv()
@@ -42,14 +43,22 @@ embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 chat_histories = {}
 retrievers = {}
 
+# Setup logging
+logging.basicConfig(level=logging.DEBUG)
+
 @app.route('/upload', methods=['POST'])
 def upload_pdf():
     # Check if the file was uploaded
     if 'file' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
-    # session_id = "default"
     session_id = request.form.get('session_id') or str(uuid.uuid4())
+    
+    # If the session already has a retriever, clear it to handle re-upload
+    if session_id in retrievers:
+        logging.debug(f"Clearing retriever for session: {session_id}")
+        del retrievers[session_id]
+
     if session_id not in chat_histories:
         chat_histories[session_id] = ChatMessageHistory()
 
@@ -57,17 +66,15 @@ def upload_pdf():
     
     documents = []
     for uploaded_file in uploaded_files:
-        # Handle only PDF files
         if uploaded_file.filename.endswith('.pdf'):
             try:
-                # Save the uploaded PDF file temporarily
                 temp_pdf_path = f"./temp_{session_id}.pdf"
                 uploaded_file.save(temp_pdf_path)
-
                 loader = PyPDFLoader(temp_pdf_path)
                 docs = loader.load()
                 documents.extend(docs)
             except Exception as e:
+                logging.error(f"Error processing PDF: {str(e)}")
                 return jsonify({"error": f"Failed to process PDF: {str(e)}"}), 500
         else:
             return jsonify({"error": "Only PDF files are allowed"}), 400
@@ -75,12 +82,22 @@ def upload_pdf():
     # Split and create embeddings for the documents
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=500)
     splits = text_splitter.split_documents(documents)
+
+    logging.debug(f"Processing documents for session: {session_id}")
+    logging.debug(f"Number of document splits: {len(splits)}")
     
     try:
-        vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings)
+        # Initialize a new vectorstore for the session
+        vectorstore = Chroma.from_documents(
+            documents=splits,
+            embedding=embeddings,
+            collection_name=f"{session_id}_collection",  # Unique collection per session
+            persist_directory="./chroma_persist"  # Define a persistent directory
+        )
         retriever = vectorstore.as_retriever()
-        retrievers[session_id] = retriever  # Store the retriever with the session_id
+        retrievers[session_id] = retriever
     except Exception as e:
+        logging.error(f"Error creating embeddings: {str(e)}")
         return jsonify({"error": f"Failed to create embeddings: {str(e)}"}), 500
 
     return jsonify({"session_id": session_id}), 200
@@ -163,6 +180,7 @@ def ask_question():
         )
         answer = response['answer']
     except Exception as e:
+        logging.error(f"Error processing the question: {str(e)}")
         return jsonify({"error": f"Failed to process the question: {str(e)}"}), 500
 
     # Update chat history with the user input and assistant's answer

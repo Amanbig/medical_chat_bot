@@ -62,6 +62,7 @@ export default function FileUploadDialog({ onUploadSuccess }) {
   };
 
   return (
+    !session?
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" style={{ display: 'none' }}>Upload PDF</Button>
@@ -90,6 +91,6 @@ export default function FileUploadDialog({ onUploadSuccess }) {
           <Button type="button" onClick={() => { setFile(null); setIsOpen(false); }}>Cancel</Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </Dialog>:null
   );
 }
