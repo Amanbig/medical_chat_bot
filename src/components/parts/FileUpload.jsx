@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { toast } from 'react-toastify';
+import { Loader } from "lucide-react";
 
 export default function FileUploadDialog({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [isOpen, setIsOpen] = useState(true); // Open dialog by default
+  const [isUpload, setIsUpload] = useState(false);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]); // Set the selected file
@@ -24,6 +26,8 @@ export default function FileUploadDialog({ onUploadSuccess }) {
 
   const handleUpload = async () => {
     if (!file) return; // Check if a file is selected
+
+    setIsUpload(true);
 
     const formData = new FormData();
     formData.append("file", file); // Prepare the form data for upload
@@ -47,6 +51,7 @@ export default function FileUploadDialog({ onUploadSuccess }) {
     } catch (error) {
       toast.error(`Upload failed: ${error.message}`); // Notify user of failure
     }
+    setIsUpload(false);
     setIsOpen(false);
   };
 
@@ -68,7 +73,14 @@ export default function FileUploadDialog({ onUploadSuccess }) {
           </div>
         </div>
         <DialogFooter>
-          <Button type="button" onClick={handleUpload}>Upload</Button>
+          {
+            !isUpload?
+            <Button type="button" onClick={handleUpload}>Upload</Button>
+            :
+            <div className='flex justify-center text-center'>
+              <Loader className='animate-spin w-8 h-8'/>
+            </div>
+          }
           <Button type="button" onClick={() => { setFile(null); setIsOpen(false); }}>Cancel</Button>
         </DialogFooter>
       </DialogContent>
