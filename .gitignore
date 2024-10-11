@@ -10,6 +10,9 @@ venv/
 # testing
 /coverage
 
+# Ignore Chroma persisted embeddings
+chroma_persist/
+
 # next.js
 /.next/
 /out/
