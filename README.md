@@ -63,7 +63,7 @@ HF_TOKEN="<hf-token>"
 #### Create a Virtual Environment
 ```bash
 python -m venv venv
-source venv/bin/activate  
+venv/Scripts/activate  
 ```
 
 #### Install Required Packages
