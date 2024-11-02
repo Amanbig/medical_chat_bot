@@ -67,12 +67,12 @@ export default function TeamPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <div className="p-2 text-5xl">
+          {/* <div className="p-2 text-5xl">
             <div>Want to join our team?</div>
           </div>
           <div className="p-2 gap-2">
             <Button variant="default">See Open Positions</Button>
-          </div>
+          </div> */}
         </motion.div>
       </main>
     </div>

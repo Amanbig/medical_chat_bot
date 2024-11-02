@@ -47,7 +47,7 @@ export default function Home() {
           transition={{ duration: 0.5, delay: 0.6 }}
         >
           <div className='p-2 text-3xl xl:text-5xl'>
-            <div>Writes, brainstorms, edits,</div>
+            <div>Writes, brainstorms, news,</div>
             <div>and explores ideas with you</div>
           </div>
           <div className='p-2 gap-2'>

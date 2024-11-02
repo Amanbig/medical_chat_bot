@@ -13,7 +13,7 @@ export default function MainCard() {
         </div>
         <div className='p-3 text-xl'>
         <div>Free to use. Easy to try. Just ask and RAG Q&A can</div>
-        <div>help with writing, learning, brainstorming, and more.</div>
+        <div>help with understanding, learning, getting news, and more.</div>
         </div>
         <div className='p-2 gap-2'>
           <Link href="/chatbot">
