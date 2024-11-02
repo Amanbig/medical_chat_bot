@@ -17,7 +17,7 @@ export default function ChatPage() {
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.6 }} // Customize duration if needed
     >
-          <FileUploadDialog/>
+          {/* <FileUploadDialog/> */}
         <ChatBot/>
       {/* Add your chatbot or other components here if needed */}
        {/* <p>File uploaded successfully!</p> Show a message or other content after upload */}

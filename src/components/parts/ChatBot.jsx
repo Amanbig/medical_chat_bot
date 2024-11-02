@@ -76,13 +76,13 @@ const ChatList = () => {
           <div
             className={`${
               chat.from === "user" ? "max-w-xs w-full" : "w-full"
-            } shadow-lg shadow-gray-600 rounded-xl p-2 ${
+            } shadow-lg  rounded-xl p-2 border-4 ${
               chat.from === "user"
-                ? "text-right bg-gray-700 dark:bg-gray-800"
-                : "text-left bg-gray-700 dark:bg-gray-800"
+                ? "text-right"
+                : "text-left "
             }`}
           >
-            <p className={`text-white dark:text-white p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
+            <p className={` p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
               {chat.value}
             </p>
             <Badge className="rounded-full">
@@ -108,7 +108,7 @@ const UserBar = () => {
   const handlePredict = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value,session_id: session });
+      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value });
       const aiMessage = response.data.answer || "Sorry, I couldn't respond.";
       
       setChats((prevChats) => [...prevChats, { value: aiMessage, from: "AI Bot" }]);
@@ -146,14 +146,14 @@ const UserBar = () => {
         <div className="rounded-full">
           {!loading ? (
             <Button
-              className="flex justify-center text-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-all duration-150"
+              className="flex justify-center text-center rounded-full transition-all duration-150"
               onClick={handleSendMessage}
             >
               <ArrowRight className="w-5 h-5" />
             </Button>
           ) : (
             <div className="flex justify-center items-center">
-              <Loader className="animate-spin w-10 h-10 text-blue-600" />
+              <Loader className="animate-spin w-10 h-10" />
             </div>
           )}
         </div>
@@ -166,7 +166,7 @@ const UserBar = () => {
 // AI Bot with typing animation
 const AiBot = () => {
   const [displayedText, setDisplayedText] = useState("");
-  const fullText = "How may I help you?";
+  const fullText = "Hoow may I help you?";
 
   useEffect(() => {
     let currentIndex = 0;
@@ -184,7 +184,7 @@ const AiBot = () => {
 
   return (
     <motion.div
-      className="flex justify-center items-center h-full text-2xl font-bold text-gray-700 dark:text-gray-300"
+      className="flex justify-center items-center h-full text-2xl font-bold "
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}

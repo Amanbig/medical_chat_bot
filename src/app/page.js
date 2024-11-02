@@ -60,7 +60,7 @@ export default function Home() {
             transition={{ duration: 0.3 }}
             whileHover={{ scale: 1.05 }} // Scale effect on hover
           >
-            <Image src="/image.png" className="w-[60%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
+            <Image src="/image.png" className="xl:w-[60%] xl:h-[50%] rounded-xl" width={500} height={300} alt="sample" priority />
           </motion.div>
         </motion.div>
 
@@ -82,7 +82,7 @@ export default function Home() {
             transition={{ duration: 0.3 }}
             whileHover={{ scale: 1.05 }} // Scale effect on hover
           >
-            <Image src="/image2.png" className="w-[60%] h-[50%] rounded-3xl" width={500} height={300} alt="sample" priority />
+            <Image src="/image2.png" className="xl:w-[60%] xl:h-[50%] rounded-xl" width={500} height={300} alt="sample" priority />
           </motion.div>
         </motion.div>
 
@@ -102,7 +102,7 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1.2 }}
         >
-          <div className="w-[60%]">
+          <div className="w-[70%]">
             <Questions />
           </div>
         </motion.div>
