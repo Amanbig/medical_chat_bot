@@ -51,7 +51,7 @@ export default function Home() {
             <div>and explores ideas with you</div>
           </div>
           <div className='p-2 gap-2'>
-            <Button variant="link">Learn more about writing with ChatBot {'>'}</Button>
+            <Button variant="link">Learn more about writing with JAC Bot {'>'}</Button>
           </div>
           <motion.div
             className="p-4 flex justify-center text-center rounded-3xl"

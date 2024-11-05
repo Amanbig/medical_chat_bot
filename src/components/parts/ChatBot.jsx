@@ -108,7 +108,7 @@ const UserBar = () => {
   const handlePredict = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value });
+      const response = await axios.post("http://127.0.0.1:5000/ask", { question: value,session_id:session });
       const aiMessage = response.data.answer || "Sorry, I couldn't respond.";
       
       setChats((prevChats) => [...prevChats, { value: aiMessage, from: "AI Bot" }]);
