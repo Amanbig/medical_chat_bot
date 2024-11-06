@@ -35,7 +35,7 @@ export default function FeaturesList() {
       {features.map((feature, index) => (
         <motion.div
           key={index}
-          className="bg-gray-800 shadow-lg rounded-lg p-6 transition-transform transform hover:scale-105"
+          className=" shadow-lg rounded-lg p-6 transition-transform transform hover:scale-105 border-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: index * 0.1 }}

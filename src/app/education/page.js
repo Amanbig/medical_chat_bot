@@ -3,34 +3,30 @@
 import { Button } from "@/components/ui/button"; // Import Button for actions
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export default function EducationPage() {
-  const courses = [
-    {
-      title: "Introduction to AI and Machine Learning",
-      description: "Learn the fundamentals of AI and machine learning concepts.",
-    },
-    {
-      title: "Advanced Data Analysis Techniques",
-      description: "Dive deep into data analysis with advanced tools and techniques.",
-    },
-    {
-      title: "Using GPT Models in Real-World Applications",
-      description: "Understand how to implement GPT models in various applications.",
-    },
-    {
-      title: "Understanding Natural Language Processing",
-      description: "Explore the world of NLP and its applications.",
-    },
-    {
-      title: "Building Applications with RAG Q&A",
-      description: "Get hands-on experience in building applications using RAG Q&A.",
-    },
-    {
-        title: "Building Applications with RAG Q&A",
-        description: "Get hands-on experience in building applications using RAG Q&A.",
-      },
-  ];
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const response = await axios.get("http://127.0.0.1:5000/education");
+        const data = response.data.educations; // Assuming `educations` is the key in the JSON response
+        const formattedCourses = Object.keys(data).map(key => ({
+          title: data[key].name,
+          description: data[key].description,
+          link: data[key].link,
+        }));
+        setCourses(formattedCourses);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    }
+
+    fetchCourses();
+  }, []);
 
   return (
     <div className="flex flex-col justify-center items-center text-center p-10 mt-10">
@@ -40,7 +36,7 @@ export default function EducationPage() {
         animate={{ opacity: 1, y: 0 }} 
         transition={{ duration: 0.5 }}
       >
-        Education Resources
+        Courses offered
       </motion.h1>
       <motion.p 
         className="mb-4 text-lg"
@@ -48,7 +44,7 @@ export default function EducationPage() {
         animate={{ opacity: 1, y: 0 }} 
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        Explore our resources for learning and development.
+        Explore our different engineering courses.
       </motion.p>
       
       <h2 className="text-3xl font-semibold mt-6">Courses Available</h2>
@@ -63,8 +59,8 @@ export default function EducationPage() {
           >
             <Card className="p-6 border border-gray-300 rounded-lg shadow-md transition-shadow duration-300 ease-in-out">
               <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
-              <p className="text-gray-700 mb-4">{course.description}</p>
-              <Button variant="link">Learn More</Button>
+              <p className="text-gray-400 mb-4">{course.description}</p>
+              <Button variant="link" onClick={() => window.open(course.link, "_blank")}>Learn More</Button>
             </Card>
           </motion.div>
         ))}

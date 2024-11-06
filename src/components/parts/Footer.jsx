@@ -6,7 +6,7 @@ import { FacebookIcon, GithubIcon, LinkedinIcon, TwitterIcon } from "lucide-reac
 
 export default function Footer() {
   return (
-    <footer className=" py-10 border-t-4">
+    <footer className=" py-10 border-t-4 bg-black text-white">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-start px-4">
         <div className="mb-6">
           <h2 className="text-2xl font-bold mb-2">JAC Bot</h2>
