@@ -62,7 +62,7 @@ const ChatList = () => {
           key={index}
           className={`flex m-8 ${chat.from === "user" ? "justify-end" : "justify-start"}`}
           initial={
-            chat.from === "user" ? { opacity: 0, x: 100 } : { opacity: 0, scale: 0 }
+            chat.from === "user" ? { opacity: 0, x: 1 } : { opacity: 0, scale: 0 }
           }
           animate={
             chat.from === "user" ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1 }
