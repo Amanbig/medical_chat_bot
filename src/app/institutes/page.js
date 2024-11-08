@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import FeaturesList from "@/components/parts/FeaturesList"; // A hypothetical component for listing features
 import { Button } from "@/components/ui/button";
 
-export default function EnterprisePage() {
+export default function InstitutesPage() {
   return (
     <div className="flex flex-col justify-center items-center text-center p-10 mt-10">
       {/* Animated Heading */}

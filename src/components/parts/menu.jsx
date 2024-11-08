@@ -43,7 +43,7 @@ const Menu = () => {
             <Button variant="link"><Link href="/team">Team</Link></Button>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Button variant="link"><Link href="/enterprise">Enterprise</Link></Button>
+            <Button variant="link"><Link href="/institutes">Institutes</Link></Button>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <Button variant="link"><Link href="/education">Education</Link></Button>
@@ -74,7 +74,7 @@ const Menu = () => {
                   <Button variant="link" onClick={toggleMobileMenu}><Link href="/team">Team</Link></Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/enterprise">Enterprise</Link></Button>
+                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/institutes">Institutes</Link></Button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Button variant="link" onClick={toggleMobileMenu}><Link href="/education">Education</Link></Button>
