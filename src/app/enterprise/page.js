@@ -14,7 +14,7 @@ export default function EnterprisePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        Enterprise Solutions
+        Participating Institutes
       </motion.h1>
 
       {/* Animated Description */}
@@ -24,7 +24,7 @@ export default function EnterprisePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        Discover scalable solutions designed to meet the needs of your enterprise.
+        Discover different Institutes that are related with JAC Councelling.
       </motion.p>
 
       {/* Animated Features List */}
