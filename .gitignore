@@ -7,7 +7,7 @@
 .yarn/install-state.gz
 app.py
 
-/__pycache__
+__pycache__/
 
 venv/
 # testing
