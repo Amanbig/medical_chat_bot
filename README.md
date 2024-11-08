@@ -21,7 +21,7 @@ A modern web application that integrates a conversational AI chatbot with real-t
   - ShadCN UI components
   - Tailwind CSS
 - **Backend**:
-  - Flask (API for chatbot and file upload functionality)
+  - Flask (API for chatbot)
 
 ## Installation
 ### Clone the repository:
