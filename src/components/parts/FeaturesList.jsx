@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
+import { URL } from "../../../urls";
 
 export default function FeaturesList() {
   const [colleges, setColleges] = useState([]);
@@ -12,7 +13,7 @@ export default function FeaturesList() {
   useEffect(() => {
     async function fetchColleges() {
       try {
-        const response = await axios.get("http://127.0.0.1:5000/college");
+        const response = await axios.get(`${URL}/college`);
         const data = response.data.colleges;
         const formattedColleges = Object.keys(data).map((key) => ({
           title: data[key].name,

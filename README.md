@@ -37,6 +37,12 @@ cd medical_chat_bot
 npm install
 ```
 
+#### Set the backend api
+Make changes in the urls.js file with your endpoint
+```javascript
+export const URL='Your endpoint Here' || 'http://127.0.0.1:5000'
+```
+
 #### Start the development server:
 ```bash
 npm run dev
