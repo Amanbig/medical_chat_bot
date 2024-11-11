@@ -16,10 +16,10 @@ os.environ['HF_TOKEN'] = "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"
 repo_id = "Ujjwal671021/llama-2-7b-uj"
 llm = HuggingFaceEndpoint(
     repo_id=repo_id,
-    # task="text-generation",
+    task="text-generation",
     max_length=150,
     temperature=0.7,
-    token=os.environ['HF_TOKEN']
+    token=os.environ['HF_TOKEN']    
 )
 
 # Streamlit UI setup
