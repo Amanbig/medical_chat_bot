@@ -76,7 +76,7 @@ const ChatList = () => {
           <div
             className={`${
               chat.from === "user" ? "max-w-xs w-full" : "w-full"
-            } shadow-lg  rounded-xl p-2 border-4 ${
+            } shadow-lg  rounded-xl p-2 dark:border-2 dark:border-white border-black border-4 ${
               chat.from === "user"
                 ? "text-right"
                 : "text-left "
@@ -141,15 +141,15 @@ const UserBar = () => {
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           disabled={loading}
-          className="flex-grow transition-all duration-150 ease-in-out border-4 p-4"
+          className="flex-grow transition-all duration-150 ease-in-out dark:border-2 dark:border-white border-4 bg-gray-200 dark:bg-gray-900 border-black p-6"
         />
-        <div className="rounded-full">
+        <div className="rounded-full p-2">
           {!loading ? (
             <Button
               className="flex justify-center text-center rounded-full transition-all duration-150"
               onClick={handleSendMessage}
             >
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight/>
             </Button>
           ) : (
             <div className="flex justify-center items-center">

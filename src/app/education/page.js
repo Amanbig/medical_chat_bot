@@ -59,7 +59,7 @@ export default function EducationPage() {
             transition={{ duration: 0.3, delay: index * 0.1 }}
             whileHover={{ scale: 1.05 }} // Scale effect on hover
           >
-            <Card className="p-6 border border-gray-300 rounded-lg shadow-md transition-shadow duration-300 ease-in-out">
+            <Card className="p-6 border dark:border-white border-black rounded-lg shadow-md transition-shadow duration-300 ease-in-out">
               <h3 className="text-xl font-semibold mb-2">{course.title}</h3>
               <p className="text-gray-400 mb-4">{course.description}</p>
               <motion.div

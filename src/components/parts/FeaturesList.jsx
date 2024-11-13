@@ -34,7 +34,7 @@ export default function FeaturesList() {
       {colleges.map((feature, index) => (
         <motion.div
           key={index}
-          className="shadow-lg rounded-lg p-6 transition-transform border-4"
+          className="shadow-lg rounded-lg p-6 transition-transform border-4 dark:border-white border-black"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           whileHover={{ scale: 1.05 }}
