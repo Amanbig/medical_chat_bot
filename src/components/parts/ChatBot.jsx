@@ -102,16 +102,34 @@ const ChatList = () => {
 const UserBar = () => {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionId, setSessionId] = useState(null); // To store session ID
   const { chats, setChats } = useContext(ChatContext);
-  const session = 'helllo'
+
+  useEffect(() => {
+    // Initialize the chat session on component mount
+    const fetchSession = async () => {
+      const response = await axios.get(`${URL}/chatbot`);
+      setSessionId(response.data.session_id);
+    };
+
+    fetchSession();
+  }, []);
 
   const handlePredict = async () => {
+    if (!sessionId) return; // Ensure session ID is available
+
     setLoading(true);
     try {
-      const response = await axios.post(`${URL}/ask`, { question: value,session_id:session });
-      const aiMessage = response.data.answer || "Sorry, I couldn't respond.";
-      
-      setChats((prevChats) => [...prevChats, { value: aiMessage, from: "AI Bot" }]);
+      const response = await axios.post(`${URL}/ask`, {
+        question: value,
+        session_id: sessionId,
+      });
+      const aiMessage = response.data.response || "Sorry, I couldn't respond.";
+
+      setChats((prevChats) => [
+        ...prevChats,
+        { value: aiMessage, from: "AI Bot" },
+      ]);
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error.message);
       setChats((prevChats) => [
@@ -149,7 +167,7 @@ const UserBar = () => {
               className="flex justify-center text-center rounded-full transition-all duration-150"
               onClick={handleSendMessage}
             >
-              <ArrowRight/>
+              <ArrowRight />
             </Button>
           ) : (
             <div className="flex justify-center items-center">
@@ -161,6 +179,7 @@ const UserBar = () => {
     </div>
   );
 };
+
 
 
 // AI Bot with typing animation
