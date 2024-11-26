@@ -79,8 +79,8 @@ fastapi dev app.py
 ## API Endpoints
 - **POST /chatbot**: Creates a session with random session id.
 - **POST /ask**: Handles user queries and returns AI-generated responses.
-- **POST /education**: Responds with data of courses available.
-- **POST /college**: Responds with data of colleges available.
+- **GET /education**: Responds with data of courses available.
+- **GET /college**: Responds with data of colleges available.
 
 ## Customization
 - Modify the chatbot behavior by updating the API.
