@@ -1,6 +1,6 @@
 # ChatBot with AI LLM Bot with File Upload
 
-A modern web application that integrates a conversational AI chatbot with real-time user interactions, including file uploads and smooth animations. Built using **React**, **Framer Motion**, **Lucide Icons**, and **ShadCN Components**.
+A modern web application that integrates a conversational AI chatbot with real-time user interactions, including file uploads and smooth animations. Built using **React**, **Framer Motion**, **Lucide Icons**, and **ShadCN Components** on Frontend and **FastApi** on backend.
 
 ## Features
 
