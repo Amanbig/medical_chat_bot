@@ -21,7 +21,8 @@ A modern web application that integrates a conversational AI chatbot with real-t
   - ShadCN UI components
   - Tailwind CSS
 - **Backend**:
-  - Flask (API for chatbot)
+  - Fastapi (API for chatbot)
+  - Fine tuned model and used Gemini api for sentence improvement
 
 ## Installation
 ### Clone the repository:
@@ -68,7 +69,7 @@ pip install -r requirements.txt
 
 #### Run the application
 ```bash
-python main.py
+fastapi dev app.py
 ```
 
 ## Usage
@@ -76,7 +77,10 @@ python main.py
 - **Responsive UI**: The app is responsive and works on mobile and desktop devices.
 
 ## API Endpoints
+- **POST /chatbot**: Creates a session with random session id.
 - **POST /ask**: Handles user queries and returns AI-generated responses.
+- **POST /education**: Responds with data of courses available.
+- **POST /college**: Responds with data of colleges available.
 
 ## Customization
 - Modify the chatbot behavior by updating the API.
