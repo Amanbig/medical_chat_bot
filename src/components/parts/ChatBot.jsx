@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 import { ArrowRight, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-// import { URL } from "../../../urls";
+import { URL } from "../../../urls";
 
 // Create ChatContext to handle state
 const ChatContext = createContext();
@@ -108,7 +108,7 @@ const UserBar = () => {
   useEffect(() => {
     // Initialize the chat session on component mount
     const fetchSession = async () => {
-      const response = await axios.get(`/chatbot`);
+      const response = await axios.get(`${URL}/chatbot`);
       setSessionId(response.data.session_id);
     };
 
@@ -120,7 +120,7 @@ const UserBar = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`/ask`, {
+      const response = await axios.post(`${URL}/ask`, {
         question: value,
         session_id: sessionId,
       });

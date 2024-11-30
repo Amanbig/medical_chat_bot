@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-// import { URL } from "../../../urls";
+import { URL } from "../../../urls";
 
 export default function EducationPage() {
   const [courses, setCourses] = useState([]);
@@ -14,7 +14,7 @@ export default function EducationPage() {
   useEffect(() => {
     async function fetchCourses() {
       try {
-        const response = await axios.get(`/education`);
+        const response = await axios.get(`${URL}/education`);
         const data = response.data.educations; // Assuming `educations` is the key in the JSON response
         const formattedCourses = Object.keys(data).map(key => ({
           title: data[key].name,
