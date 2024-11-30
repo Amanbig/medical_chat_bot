@@ -48,7 +48,7 @@ async def chatbot_session():
         chat_histories[session_id] = ChatMessageHistory()
     return {"session_id": session_id}
 
-@app.post("/ask")
+@app.post("backend/ask")
 async def ask_question(data: dict):
     session_id = data.get('session_id')
     user_input = data.get('question')
