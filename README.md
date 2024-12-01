@@ -31,8 +31,6 @@ git clone https://github.com/Amanbig/medical_chat_bot.git
 cd medical_chat_bot
 ```
 
-### Frontend Setup
-
 #### Install dependencies:
 ```bash
 npm install
@@ -44,33 +42,24 @@ Make changes in the urls.js file with your endpoint
 export const URL='Your endpoint Here' || 'http://127.0.0.1:5000'
 ```
 
-#### Start the development server:
+#### Create a Virtual Environment
+```bash
+python -m venv venv
+venv/Scripts/activate  #source venv/bin/activate in linux
+```
+
+#### Start the development server with fastapi backend:
 ```bash
 npm run dev
 ```
 
-### Backend Setup
-
-#### Move to backend directory
+#### Scripts with package.json for running fastapi:
 ```bash
-cd backend
+"fastapi-dev": "pip3 install -r requirements.txt && python -m uvicorn backend.app:app --reload",
+"next-dev": "next dev --turbo",
+"dev": "concurrently \"npm run next-dev\" \"npm run fastapi-dev\"",
 ```
 
-#### Create a Virtual Environment
-```bash
-python -m venv venv
-venv/Scripts/activate  
-```
-
-#### Install Required Packages
-```bash
-pip install -r requirements.txt
-```
-
-#### Run the application
-```bash
-fastapi dev app.py
-```
 
 ## Usage
 - **Chat with AI**: Enter your query in the input box and press Enter or click the send button to receive an AI response.
