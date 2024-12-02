@@ -35,7 +35,7 @@ retrievers = {}
 
 @app.get("/education")
 async def get_education():
-    return {"/educations": educations}
+    return {"educations": educations}
 
 @app.get("/college")
 async def get_college():
