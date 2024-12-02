@@ -10,7 +10,8 @@ class Chatbot:
         # Use the appropriate tokenizer for 'gpt2-large'
         self.tokenizer = GPT2Tokenizer.from_pretrained('gpt2-large')
         self.tokenizer.pad_token = self.tokenizer.eos_token  # Setting pad_token
-        self.model =  GPT2LMHeadModel.from_pretrained('amanpreet7/gpt2-chat-model')
+        self.model =  GPT2LMHeadModel.from_pretrained('amanpreet7/gpt2-chat-model') #100
+        # self.model =  GPT2LMHeadModel.from_pretrained('amanpreet7/gp2-v1')
         # GPT2Config with parameters similar to 'gpt2-large'
         self.config = GPT2Config(
             vocab_size=self.tokenizer.vocab_size,
@@ -58,9 +59,42 @@ class Chatbot:
         # Decode the output into readable text
         return self.tokenizer.decode(output_ids, skip_special_tokens=True)
 
-# Example usage:
-# if __name__ == "__main__":
-#     chatbot = Chatbot(model_path='backend/model/trained_gpt2_model.pth')  # Provide the correct path to your saved model
-#     prompt = "Hello, how are you?"
-#     response = chatbot.chat(prompt)
-#     print("Chatbot response:", response)
+'''
+import torch
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from core.config import settings
+
+class Chatbot:
+    def __init__(self, model_path=settings.MODEL_PATH):
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Using device: {self.device}")
+        
+        # Load the tokenizer and model from the pre-trained source
+        self.tokenizer = GPT2Tokenizer.from_pretrained('amanpreet7/gp2-v1') #500
+        self.tokenizer.pad_token = self.tokenizer.eos_token  # Set padding token to EOS
+        
+        self.model = GPT2LMHeadModel.from_pretrained('amanpreet7/gp2-v1')
+        self.model.to(self.device)
+
+    def chat(self, prompt, max_length=150, temperature=0.7):
+        self.model.eval()
+        # Tokenize input prompt and move to the correct device
+        inputs = self.tokenizer(prompt, return_tensors='pt', truncation=True, padding=True, max_length=max_length).to(self.device)
+        
+        with torch.no_grad():
+            output = self.model.generate(
+                input_ids=inputs['input_ids'],  # Corrected input_ids usage
+                attention_mask=inputs['attention_mask'],  # Corrected attention_mask usage
+                max_length=max_length, 
+                num_return_sequences=1,
+                temperature=temperature,
+                top_p=0.9,
+                top_k=50,
+                no_repeat_ngram_size=2,
+                do_sample=True
+            )
+        
+        # Decode and return the generated text
+        return self.tokenizer.decode(output[0], skip_special_tokens=True)
+
+'''

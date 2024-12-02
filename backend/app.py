@@ -33,22 +33,22 @@ retrievers = {}
 # Initialize the chatbot
 # chatbot = Chatbot(model_path='backend/model/trained_gpt2_model.pth')  # Adjust the path accordingly
 
-@app.get("backend/education")
+@app.get("/education")
 async def get_education():
-    return {"backend/educations": educations}
+    return {"/educations": educations}
 
-@app.get("backend/college")
+@app.get("/college")
 async def get_college():
     return {"colleges": colleges}
 
-@app.get("backend/chatbot")
+@app.get("/chatbot")
 async def chatbot_session():
     session_id = str(uuid4())
     if session_id not in chat_histories:
         chat_histories[session_id] = ChatMessageHistory()
     return {"session_id": session_id}
 
-@app.post("backend/ask")
+@app.post("/ask")
 async def ask_question(data: dict):
     session_id = data.get('session_id')
     user_input = data.get('question')
