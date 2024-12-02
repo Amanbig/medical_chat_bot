@@ -3,7 +3,7 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel, GPT2Config
 from core.config import settings
 
 class Chatbot:
-    def __init__(self, model_path=settings.MODEL_PATH):
+    def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print(f"Using device: {self.device}")
         
@@ -35,7 +35,7 @@ class Chatbot:
 
 
     def chat(self, prompt, max_length=150, temperature=0.7):
-        # self.model.eval()
+        self.model.eval()
         input_ids = self.tokenizer.encode(prompt, return_tensors='pt').to(self.device)
         
         with torch.no_grad():

@@ -64,7 +64,7 @@ async def ask_question(data: dict):
 
     session_history.add_user_message(user_input)
     # Generate response using the chatbot
-    chatbot = Chatbot(model_path='model/trained_gpt2_model.pth')  # Adjust the path accordingly
+    chatbot = Chatbot()  # Adjust the path accordingly
     
     response = chatbot.chat(user_input)
     

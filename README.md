@@ -53,7 +53,12 @@ venv/Scripts/activate  #source venv/bin/activate in linux
 npm run dev
 ```
 
-#### Scripts with package.json for running fastapi:
+#### Server running at
+```bash
+localhost:3000
+```
+
+### Scripts with package.json for running fastapi:
 ```bash
 "fastapi-dev": "pip3 install -r requirements.txt && python -m uvicorn backend.app:app --reload",
 "next-dev": "next dev --turbo",
