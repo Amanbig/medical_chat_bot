@@ -62,6 +62,7 @@ async def ask_question(data: dict):
     # Add refined input to the session history (this can be used for context in the future)
     session_history = chat_histories.get(session_id)
 
+    session_history.add_user_message(user_input)
     # Generate response using the chatbot
     chatbot = Chatbot(model_path='model/trained_gpt2_model.pth')  # Adjust the path accordingly
     
@@ -69,7 +70,6 @@ async def ask_question(data: dict):
     
     cleaned_input = clean_text(response)
     refined_output = await refine_chat_message(cleaned_input)
-    session_history.add_user_message(refined_output)
     # Generate response using the chatbot instance
 
     # response = Chatbot.chat(refined_input)
