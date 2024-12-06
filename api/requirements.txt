@@ -1,0 +1,10 @@
+flask
+flask_cors
+langchain
+langchain_community
+langchain_core
+langchain_groq
+langchain_huggingface
+datasets
+chromadb
+python-dotenv

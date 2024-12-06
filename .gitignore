@@ -6,6 +6,8 @@
 .pnp.js
 .yarn/install-state.gz
 
+chroma_db/
+
 __pycache__/
 
 venv/
@@ -14,8 +16,6 @@ venv/
 
 # Ignore Chroma persisted embeddings
 chroma_persist/
-
-*.pdf
 
 # next.js
 /.next/
