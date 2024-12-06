@@ -10,3 +10,5 @@ transformers
 python_dotenv
 uvicorn
 pypdf
+datasets
+accelerate
