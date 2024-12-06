@@ -52,6 +52,8 @@ const ChatBot = () => {
 };
 
 // ChatList to display user and AI messages with animation
+import Linkify from "react-linkify"; // Install with `npm install react-linkify`
+
 const ChatList = () => {
   const { chats } = useContext(ChatContext);
 
@@ -76,24 +78,29 @@ const ChatList = () => {
           <div
             className={`${
               chat.from === "user" ? "max-w-xs w-full" : "w-full"
-            } shadow-lg  rounded-xl p-2 dark:border-2 dark:border-white border-black border-4 ${
-              chat.from === "user"
-                ? "text-right"
-                : "text-left "
+            } shadow-lg rounded-xl p-2 dark:border-2 dark:border-white border-black border-4 ${
+              chat.from === "user" ? "text-right" : "text-left"
             }`}
           >
-            <p className={` p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
-              {chat.value}
-            </p>
-            <Badge className="rounded-full">
-              {chat.from}
-            </Badge>
+            <Linkify
+              componentDecorator={(decoratedHref, decoratedText, key) => (
+                <a href={decoratedHref} target="_blank" rel="noopener noreferrer" key={key} className="text-blue-500 underline">
+                  {decoratedText}
+                </a>
+              )}
+            >
+              <p className={`p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
+                {chat.value}
+              </p>
+            </Linkify>
+            <Badge className="rounded-full">{chat.from}</Badge>
           </div>
         </motion.div>
       ))}
     </div>
   );
 };
+
 
 
 

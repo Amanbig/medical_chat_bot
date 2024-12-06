@@ -2,7 +2,6 @@
 
 import CardSlider from "@/components/parts/CardSlider";
 import MainCard from "@/components/parts/MainCard";
-import PricingCards from "@/components/parts/PricingCards";
 import Questions from "@/components/parts/questions";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -84,15 +83,6 @@ export default function Home() {
           >
             <Image src="/image2.png" className="xl:w-[60%] xl:h-[50%] rounded-xl" width={500} height={300} alt="sample" priority />
           </motion.div>
-        </motion.div>
-
-        {/* Pricing Cards with Animation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1.0 }}
-        >
-          <PricingCards />
         </motion.div>
 
         {/* Questions Section */}

@@ -12,8 +12,6 @@ import { Button } from "../ui/button";
 import { Cross1Icon } from '@radix-ui/react-icons';
 import { MenuIcon } from 'lucide-react';
 import { ModeToggle } from './Themes';
-// import { Switch } from '@radix-ui/react-switch';
-// import { useTheme } from 'next-themes';
 
 const Menu = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,12 +41,6 @@ const Menu = () => {
             <Button variant="link"><Link href="/team">Team</Link></Button>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Button variant="link"><Link href="/institutes">Institutes</Link></Button>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Button variant="link"><Link href="/education">Education</Link></Button>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
             {/* <Button variant="link"><Link href="/pricing">Pricing</Link></Button> */}
             <ModeToggle/>
           </NavigationMenuItem>
@@ -72,12 +64,6 @@ const Menu = () => {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Button variant="link" onClick={toggleMobileMenu}><Link href="/team">Team</Link></Button>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/institutes">Institutes</Link></Button>
-                </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/education">Education</Link></Button>
                 </NavigationMenuItem>
                 {/* <NavigationMenuItem>
                   <Switch onClick={() =>{

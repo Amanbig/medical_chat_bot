@@ -1,91 +1,156 @@
-import sys
 import os
-
-# Add the project root directory to the Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from fastapi import FastAPI, HTTPException, Request
+from uuid import uuid4
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from uuid import uuid4
+from langchain.chains import create_history_aware_retriever, create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.vectorstores import Chroma
 from langchain_community.chat_message_histories import ChatMessageHistory
-from services.chat_gen import Chatbot  # Import the Chatbot class
-from services.chat_refine import refine_chat_message, clean_text  # Import the refinement functions
-from public.educations import educations
-from public.colleges import colleges
+from langchain.schema import Document
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables.history import RunnableWithMessageHistory
+from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
+
+# Load environment variables
+load_dotenv()
+HF_TOKEN = os.getenv("HF_TOKEN")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+if not HF_TOKEN or not GROQ_API_KEY:
+    raise EnvironmentError("Please provide valid HuggingFace Token and Groq API Key in the environment variables.")
 
 # Initialize FastAPI app
 app = FastAPI()
 
-# Allow CORS
+# Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],  # Adjust as necessary
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Initialize chat histories and retrievers
+# Chatbot initialization
+embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="Gemma2-9b-It")
+
+# Load and process PDF
+# Define a list of predefined PDF file paths
+predefined_pdf_paths = [
+    "./public/public_pdf/JAc_Chandigarh.pdf",
+    "./public/public_pdf/faq.pdf", 
+    "./public/public_pdf/seat_matrix.pdf",
+    "./public/public_pdf/shedule.pdf",
+    "./public/public_pdf/cca.pdf",
+    "./public/public_pdf/ccet.pdf",
+    "./public/public_pdf/uiet.pdf",
+    "./public/public_pdf/pussgrc.pdf",
+    "./public/public_pdf/ssbuccit.pdf",
+    "./public/public_pdf/overall_seat_ch.pdf",
+    "./public/public_pdf/overall_seat_pu.pdf",
+    "./public/public_pdf/eligibility.pdf",
+    # Add more PDFs as needed
+]
+
+# Initialize an empty list to hold all PDF documents
+pdf_documents = []
+
+# Loop through each PDF path and load the documents
+for pdf_path in predefined_pdf_paths:
+    if not os.path.exists(pdf_path):
+        raise FileNotFoundError(f"PDF file not found at {pdf_path}")
+    
+    loader = PyPDFLoader(pdf_path)
+    pdf_documents.extend(loader.load())  # Add the documents from each PDF to the list
+
+
+# Combine PDF and scraped content
+all_documents = pdf_documents
+
+# Split documents into chunks
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=500)
+splits = text_splitter.split_documents(all_documents)
+
+# Initialize vector store
+persist_directory = "./chroma_db"
+vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory=persist_directory)
+retriever = vectorstore.as_retriever()
+
+# Prompts for history-aware retriever
+contextualize_q_system_prompt = (
+    "Given a chat history and the latest user question, formulate a standalone question. "
+    "If the question is already standalone, return it as is."
+)
+contextualize_q_prompt = ChatPromptTemplate.from_messages([
+    ("system", contextualize_q_system_prompt),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
+
+system_prompt = (
+    "You are an assistant for question-answering tasks. Use the retrieved context to answer "
+    "the question accurately and concisely. Do not add extra commentary or phrases unless explicitly asked."
+    "\n\n{context}"
+)
+qa_prompt = ChatPromptTemplate.from_messages([
+    ("system", system_prompt),
+    MessagesPlaceholder("chat_history"),
+    ("human", "{input}"),
+])
+question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
+rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+# Store chat histories for sessions
 chat_histories = {}
-retrievers = {}
-
-# Initialize the chatbot
-# chatbot = Chatbot(model_path='backend/model/trained_gpt2_model.pth')  # Adjust the path accordingly
-
-@app.get("/education")
-async def get_education():
-    return {"educations": educations}
-
-@app.get("/college")
-async def get_college():
-    return {"colleges": colleges}
 
 @app.get("/chatbot")
-async def chatbot_session():
+async def create_session():
     session_id = str(uuid4())
-    if session_id not in chat_histories:
-        chat_histories[session_id] = ChatMessageHistory()
+    chat_histories[session_id] = ChatMessageHistory()
     return {"session_id": session_id}
 
 @app.post("/ask")
 async def ask_question(data: dict):
-    session_id = data.get('session_id')
-    user_input = data.get('question')
+    session_id = data.get("session_id")
+    user_input = data.get("question")
 
-    if not user_input:
-        raise HTTPException(status_code=400, detail="No question provided")
+    if not session_id or not user_input:
+        raise HTTPException(status_code=400, detail="Session ID and question are required.")
 
     if session_id not in chat_histories:
-        raise HTTPException(status_code=400, detail="Invalid session ID")
+        raise HTTPException(status_code=404, detail="Session ID not found.")
 
-    # Add refined input to the session history (this can be used for context in the future)
-    session_history = chat_histories.get(session_id)
+    session_history = chat_histories[session_id]
 
+    # Prepare conversational chain
+    conversational_rag_chain = RunnableWithMessageHistory(
+        rag_chain,
+        lambda session: session_history,
+        input_messages_key="input",
+        history_messages_key="chat_history",
+        output_messages_key="answer"
+    )
+
+    # Get the response
+    response = conversational_rag_chain.invoke(
+        {"input": user_input},
+        {"configurable": {"session_id": session_id}}
+    )
+    answer = response.get("answer", "Currently, this information is not available.")
+
+    # Update session history
     session_history.add_user_message(user_input)
-    # Generate response using the chatbot
-    chatbot = Chatbot()  # Adjust the path accordingly
-    
-    response = chatbot.chat(user_input)
-    
-    cleaned_input = clean_text(response)
-    refined_output = await refine_chat_message(cleaned_input)
-    # Generate response using the chatbot instance
-
-    # response = Chatbot.chat(refined_input)
-
-    # Store the assistant's response in the chat history
-    # session_history.add_assistant_message(response)
-    session_history.add_message({"role": "assistant", "content": refined_output})
-
+    session_history.add_message({"role": "assistant", "content": answer})
 
     return JSONResponse(content={
-        'session_id': session_id,
-        'user_input': cleaned_input,
-        'response': refined_output
+        "session_id": session_id,
+        "question": user_input,
+        "response": answer
     })
-
-
-# if __name__ == '__main__':
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,8 +1,12 @@
 fastapi[Standard]
 langchain
-langchain-community
+langchain_community
+langchain_text_splitters
+langchain_huggingface
+langchain_groq
+langchain_core
 torch
 transformers
-google-generativeai
 python_dotenv
 uvicorn
+pypdf
