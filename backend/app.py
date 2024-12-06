@@ -55,6 +55,7 @@ predefined_pdf_paths = [
     "./public/public_pdf/overall_seat_ch.pdf",
     "./public/public_pdf/overall_seat_pu.pdf",
     "./public/public_pdf/eligibility.pdf",
+    "./public/public_pdf/programs.pdf",
     # Add more PDFs as needed
 ]
 

@@ -10,3 +10,4 @@ transformers
 python_dotenv
 uvicorn
 pypdf
+chromadb
