@@ -22,7 +22,7 @@ const Menu = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 p-2 flex justify-between items-center shadow-lg xl:px-10 border-b-3 border-gray-600 xl:border-none z-50 bg-inherit">
-      <div className="text-lg font-bold">JAC Bot</div>
+      <div className="text-lg font-bold"><Link href="/">JAC Bot</Link></div>
 
       {/* Hamburger menu for mobile */}
       <div className="flex xl:hidden">
@@ -36,9 +36,6 @@ const Menu = () => {
         <NavigationMenuList className="flex flex-row space-x-4">
           <NavigationMenuItem>
             <Button variant="link"><Link href="/">Overview</Link></Button>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <Button variant="link"><Link href="/team">Team</Link></Button>
           </NavigationMenuItem>
           <NavigationMenuItem>
             {/* <Button variant="link"><Link href="/pricing">Pricing</Link></Button> */}
@@ -62,14 +59,6 @@ const Menu = () => {
                 <NavigationMenuItem>
                   <Button variant="link" onClick={toggleMobileMenu}><Link href="/">Overview</Link></Button>
                 </NavigationMenuItem>
-                <NavigationMenuItem>
-                  <Button variant="link" onClick={toggleMobileMenu}><Link href="/team">Team</Link></Button>
-                </NavigationMenuItem>
-                {/* <NavigationMenuItem>
-                  <Switch onClick={() =>{
-                     setTheme("light")
-                  }}/>
-                </NavigationMenuItem> */}
               </NavigationMenuList>
             </NavigationMenu>
           </motion.div>
