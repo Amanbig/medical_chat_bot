@@ -22,7 +22,7 @@ A modern web application that integrates a conversational AI chatbot with real-t
   - Tailwind CSS
 - **Backend**:
   - Fastapi (API for chatbot)
-  - Fine tuned model and used Gemini api for sentence improvement
+  - GROQ API for inference
 
 ## Installation
 ### Clone the repository:
