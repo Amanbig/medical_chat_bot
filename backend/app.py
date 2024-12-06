@@ -15,6 +15,7 @@ from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
+import pdfplumber
 
 # Load environment variables
 load_dotenv()
@@ -38,10 +39,9 @@ app.add_middleware(
 
 # Chatbot initialization
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="Gemma2-9b-It")
+llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.1-70b-versatile")
 
 # Load and process PDF
-# Define a list of predefined PDF file paths
 predefined_pdf_paths = [
     "./public/public_pdf/JAc_Chandigarh.pdf",
     "./public/public_pdf/faq.pdf", 
@@ -56,8 +56,18 @@ predefined_pdf_paths = [
     "./public/public_pdf/overall_seat_pu.pdf",
     "./public/public_pdf/eligibility.pdf",
     "./public/public_pdf/programs.pdf",
-    # Add more PDFs as needed
 ]
+
+# Function to load PDF using pdfplumber
+def load_pdf_with_pdfplumber(pdf_path):
+    text = ""
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                text += page.extract_text() or ""
+    except Exception as e:
+        print(f"Error loading PDF {pdf_path}: {e}")
+    return text
 
 # Initialize an empty list to hold all PDF documents
 pdf_documents = []
@@ -67,15 +77,20 @@ for pdf_path in predefined_pdf_paths:
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"PDF file not found at {pdf_path}")
     
-    loader = PyPDFLoader(pdf_path)
-    pdf_documents.extend(loader.load())  # Add the documents from each PDF to the list
-
+    pdf_text = load_pdf_with_pdfplumber(pdf_path)
+    
+    if not pdf_text.strip():
+        print(f"Warning: No valid text extracted from {pdf_path}. Skipping this file.")
+        continue
+    
+    # Convert the text into a list of Document objects (one document per PDF)
+    pdf_documents.append(Document(page_content=pdf_text, metadata={"source": pdf_path}))
 
 # Combine PDF and scraped content
 all_documents = pdf_documents
 
 # Split documents into chunks
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=5000, chunk_overlap=500)
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300)  # Adjusted chunk size and overlap
 splits = text_splitter.split_documents(all_documents)
 
 # Initialize vector store
@@ -97,7 +112,7 @@ history_aware_retriever = create_history_aware_retriever(llm, retriever, context
 
 system_prompt = (
     "You are an assistant for question-answering tasks. Use the retrieved context to answer "
-    "the question accurately and concisely. Do not add extra commentary or phrases unless explicitly asked."
+    "the question directly and concisely. Avoid adding extra phrases or commentary unless explicitly asked."
     "\n\n{context}"
 )
 qa_prompt = ChatPromptTemplate.from_messages([

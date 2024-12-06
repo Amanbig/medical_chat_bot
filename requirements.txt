@@ -11,3 +11,4 @@ python_dotenv
 uvicorn
 pypdf
 chromadb
+pdfplumber
