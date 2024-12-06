@@ -3,8 +3,6 @@
 import CardSlider from "@/components/parts/CardSlider";
 import MainCard from "@/components/parts/MainCard";
 import Questions from "@/components/parts/questions";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -38,56 +36,9 @@ export default function Home() {
           <CardSlider direction="right" />
         </motion.div>
 
-        {/* Section for Writing with RAG Q&A */}
-        <motion.div
-          className='pt-20 pb-20 m-3 flex flex-col text-center justify-center'
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-        >
-          <div className='p-2 text-3xl xl:text-5xl'>
-            <div>Writes, brainstorms, news,</div>
-            <div>and explores ideas with you</div>
-          </div>
-          <div className='p-2 gap-2'>
-            <Button variant="link">Learn more about writing with JAC Bot {'>'}</Button>
-          </div>
-          <motion.div
-            className="p-4 flex justify-center text-center rounded-3xl"
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.05 }} // Scale effect on hover
-          >
-            <Image src="/image.png" className="xl:w-[60%] xl:h-[50%] rounded-xl" width={500} height={300} alt="sample" priority />
-          </motion.div>
-        </motion.div>
-
-        {/* Section for Productivity Insights */}
-        <motion.div
-          className='pt-20 pb-20 m-3 flex flex-col text-center justify-center'
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          <div className='p-2 text-3xl xl:text-5xl'>
-            <div>Summarize meetings. Find new</div>
-            <div>insights. Increase productivity.</div>
-          </div>
-          <motion.div
-            className="p-4 flex justify-center text-center rounded-3xl"
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.3 }}
-            whileHover={{ scale: 1.05 }} // Scale effect on hover
-          >
-            <Image src="/image2.png" className="xl:w-[60%] xl:h-[50%] rounded-xl" width={500} height={300} alt="sample" priority />
-          </motion.div>
-        </motion.div>
-
         {/* Questions Section */}
         <motion.div
-          className="p-4 flex justify-center text-center"
+          className="p-4 mt-10 flex justify-center text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 1.2 }}
