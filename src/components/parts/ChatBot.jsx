@@ -57,18 +57,35 @@ import Linkify from "react-linkify"; // Install with `npm install react-linkify`
 const ChatList = () => {
   const { chats } = useContext(ChatContext);
 
+  // Function to detect and render list
+  const renderMessage = (message) => {
+    // Check if the message starts with bullet points or numbered list (you can customize this regex)
+    const listPattern = /^(•|\d+\.)\s+/;
+
+    if (listPattern.test(message)) {
+      // Split the message into list items (assuming they are separated by newlines)
+      const listItems = message.split("\n").filter(item => item.trim());
+      return (
+        <ul className="list-disc pl-5">
+          {listItems.map((item, index) => (
+            <li key={index}>{item.replace(listPattern, '')}</li> // Remove bullet or number
+          ))}
+        </ul>
+      );
+    }
+
+    // Return the message as is if no list pattern is found
+    return message;
+  };
+
   return (
     <div className="overflow-y-auto p-4">
       {chats.map((chat, index) => (
         <motion.div
           key={index}
           className={`flex m-8 ${chat.from === "user" ? "justify-end" : "justify-start"}`}
-          initial={
-            chat.from === "user" ? { opacity: 0, x: 1 } : { opacity: 0, scale: 0 }
-          }
-          animate={
-            chat.from === "user" ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1 }
-          }
+          initial={chat.from === "user" ? { opacity: 0, x: 1 } : { opacity: 0, scale: 0 }}
+          animate={chat.from === "user" ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1 }}
           transition={{
             type: "spring",
             stiffness: 120,
@@ -84,13 +101,20 @@ const ChatList = () => {
           >
             <Linkify
               componentDecorator={(decoratedHref, decoratedText, key) => (
-                <a href={decoratedHref} target="_blank" rel="noopener noreferrer" key={key} className="text-blue-500 underline">
+                <a
+                  href={decoratedHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key={key}
+                  className="text-blue-500 underline"
+                >
                   {decoratedText}
                 </a>
               )}
             >
               <p className={`p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
-                {chat.value}
+                {/* Render the message, checking if it's a list */}
+                {renderMessage(chat.value)}
               </p>
             </Linkify>
             <Badge className="rounded-full">{chat.from}</Badge>
@@ -100,10 +124,6 @@ const ChatList = () => {
     </div>
   );
 };
-
-
-
-
 
 // UserBar for sending messages
 const UserBar = () => {
