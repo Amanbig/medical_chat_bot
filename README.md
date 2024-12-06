@@ -73,8 +73,6 @@ localhost:3000
 ## API Endpoints
 - **GET /chatbot**: Creates a session with random session id.
 - **POST /ask**: Handles user queries and returns AI-generated responses.
-- **GET /education**: Responds with data of courses available.
-- **GET /college**: Responds with data of colleges available.
 
 ## Customization
 - Modify the chatbot behavior by updating the API.
