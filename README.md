@@ -42,6 +42,13 @@ Make changes in the urls.js file with your endpoint
 export const URL='Your endpoint Here' || 'http://127.0.0.1:5000'
 ```
 
+#### Create .env file and provide the following api_key
+
+```bash
+GROQ_API_KEY=<your_api_key>
+HF_TOKEN=<your_hf_token>
+```
+
 #### Create a Virtual Environment
 ```bash
 python -m venv venv
