@@ -6,3 +6,5 @@ transformers
 google-generativeai
 python_dotenv
 uvicorn
+datasets
+accelerate
