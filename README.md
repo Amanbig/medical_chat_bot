@@ -36,17 +36,12 @@ cd medical_chat_bot
 npm install
 ```
 
-#### Set the backend api
-Make changes in the urls.js file with your endpoint
-```javascript
-export const URL='Your endpoint Here' || 'http://127.0.0.1:5000'
-```
-
 #### Create .env file and provide the following api_key
 
 ```bash
 GROQ_API_KEY=<your_api_key>
 HF_TOKEN=<your_hf_token>
+NEXT_PUBLIC_URL=<your_endpoint_here>
 ```
 
 #### Create a Virtual Environment
