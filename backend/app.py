@@ -18,7 +18,6 @@ from langchain_community.document_loaders import PyPDFLoader
 import pdfplumber
 from pdf2image import convert_from_path
 import pytesseract
-import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
