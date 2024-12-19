@@ -16,6 +16,9 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 import pdfplumber
+from pdf2image import convert_from_path
+import pytesseract
+import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
@@ -39,7 +42,7 @@ app.add_middleware(
 
 # Chatbot initialization
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.1-70b-versatile")
+llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.1-8b-instant")
 
 # Load and process PDF
 predefined_pdf_paths = [
@@ -66,7 +69,18 @@ def load_pdf_with_pdfplumber(pdf_path):
             for page in pdf.pages:
                 text += page.extract_text() or ""
     except Exception as e:
-        print(f"Error loading PDF {pdf_path}: {e}")
+        print(f"Error loading PDF {pdf_path} with pdfplumber: {e}")
+    return text
+
+# Function to extract text using OCR as fallback
+def load_pdf_with_ocr(pdf_path):
+    text = ""
+    try:
+        images = convert_from_path(pdf_path)
+        for image in images:
+            text += pytesseract.image_to_string(image)
+    except Exception as e:
+        print(f"Error loading PDF {pdf_path} with OCR: {e}")
     return text
 
 # Initialize an empty list to hold all PDF documents
@@ -80,17 +94,21 @@ for pdf_path in predefined_pdf_paths:
     pdf_text = load_pdf_with_pdfplumber(pdf_path)
     
     if not pdf_text.strip():
-        print(f"Warning: No valid text extracted from {pdf_path}. Skipping this file.")
+        print(f"Warning: No valid text extracted from {pdf_path} with pdfplumber. Attempting OCR fallback.")
+        pdf_text = load_pdf_with_ocr(pdf_path)
+    
+    if not pdf_text.strip():
+        print(f"Warning: No valid text extracted from {pdf_path} even with OCR. Skipping this file.")
         continue
     
-    # Convert the text into a list of Document objects (one document per PDF)
+    # Convert the text into a Document object
     pdf_documents.append(Document(page_content=pdf_text, metadata={"source": pdf_path}))
 
 # Combine PDF and scraped content
 all_documents = pdf_documents
 
 # Split documents into chunks
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300)  # Adjusted chunk size and overlap
+text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300)
 splits = text_splitter.split_documents(all_documents)
 
 # Initialize vector store
@@ -170,3 +188,10 @@ async def ask_question(data: dict):
         "question": user_input,
         "response": answer
     })
+
+@app.get("/inspect/{pdf_name}")
+async def inspect_pdf(pdf_name: str):
+    for doc in all_documents:
+        if pdf_name in doc.metadata.get("source", ""):
+            return {"content": doc.page_content[:1000]}  # Return a snippet
+    raise HTTPException(status_code=404, detail="PDF not found")

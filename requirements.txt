@@ -12,3 +12,5 @@ uvicorn
 pypdf
 chromadb
 pdfplumber
+pdf2image
+pytesseract
