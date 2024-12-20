@@ -8,6 +8,8 @@ import { ArrowRight, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { URL } from "../../../urls";
+// ChatList to display user and AI messages with animation
+import Linkify from "react-linkify"; // Install with `npm install react-linkify`
 
 // Create ChatContext to handle state
 const ChatContext = createContext();
@@ -51,31 +53,29 @@ const ChatBot = () => {
   );
 };
 
-// ChatList to display user and AI messages with animation
-import Linkify from "react-linkify"; // Install with `npm install react-linkify`
-
 const ChatList = () => {
   const { chats } = useContext(ChatContext);
+  const [expandedIndex, setExpandedIndex] = useState(null); // Track expanded messages
 
-  // Function to detect and render list
   const renderMessage = (message) => {
-    // Check if the message starts with bullet points or numbered list (you can customize this regex)
     const listPattern = /^(•|\d+\.)\s+/;
 
     if (listPattern.test(message)) {
-      // Split the message into list items (assuming they are separated by newlines)
-      const listItems = message.split("\n").filter(item => item.trim());
+      const listItems = message.split("\n").filter((item) => item.trim());
       return (
         <ul className="list-disc pl-5">
           {listItems.map((item, index) => (
-            <li key={index}>{item.replace(listPattern, '')}</li> // Remove bullet or number
+            <li key={index}>{item.replace(listPattern, "")}</li>
           ))}
         </ul>
       );
     }
 
-    // Return the message as is if no list pattern is found
     return message;
+  };
+
+  const handleToggleExpand = (index) => {
+    setExpandedIndex(index === expandedIndex ? null : index); // Toggle expand/collapse
   };
 
   return (
@@ -98,6 +98,7 @@ const ChatList = () => {
             } shadow-lg rounded-xl p-2 dark:border-2 dark:border-white border-black border-4 ${
               chat.from === "user" ? "text-right" : "text-left"
             }`}
+            onClick={() => handleToggleExpand(index)}
           >
             <Linkify
               componentDecorator={(decoratedHref, decoratedText, key) => (
@@ -112,8 +113,11 @@ const ChatList = () => {
                 </a>
               )}
             >
-              <p className={`p-2 text-sm ${chat.from === "user" ? "truncate" : ""}`}>
-                {/* Render the message, checking if it's a list */}
+              <p
+                className={`p-2 text-sm cursor-pointer ${
+                  chat.from === "user" && index !== expandedIndex ? "truncate" : ""
+                }`}
+              >
                 {renderMessage(chat.value)}
               </p>
             </Linkify>
@@ -124,6 +128,7 @@ const ChatList = () => {
     </div>
   );
 };
+
 
 // UserBar for sending messages
 const UserBar = () => {
