@@ -14,7 +14,6 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
 import pdfplumber
 from pdf2image import convert_from_path
 import pytesseract
@@ -33,7 +32,7 @@ app = FastAPI()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust as necessary
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -43,76 +42,107 @@ app.add_middleware(
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.1-8b-instant")
 
-# Load and process PDF
-predefined_pdf_paths = [
-    "./public/public_pdf/JAc_Chandigarh.pdf",
-    "./public/public_pdf/faq.pdf", 
-    "./public/public_pdf/seat_matrix.pdf",
-    "./public/public_pdf/shedule.pdf",
-    "./public/public_pdf/cca.pdf",
-    "./public/public_pdf/ccet.pdf",
-    "./public/public_pdf/uiet.pdf",
-    "./public/public_pdf/pussgrc.pdf",
-    "./public/public_pdf/ssbuccit.pdf",
-    "./public/public_pdf/overall_seat_ch.pdf",
-    "./public/public_pdf/overall_seat_pu.pdf",
-    "./public/public_pdf/eligibility.pdf",
-    "./public/public_pdf/programs.pdf",
-]
+# Specify the folder containing PDFs
+pdf_folder = "./public/public_pdf"
 
-# Function to load PDF using pdfplumber
+# Function to get all PDF files from a folder dynamically
+def get_pdf_paths(folder_path):
+    if not os.path.isdir(folder_path):
+        raise FileNotFoundError(f"Directory not found: {folder_path}")
+    pdf_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.lower().endswith('.pdf')]
+    if not pdf_paths:
+        raise FileNotFoundError(f"No PDF files found in directory: {folder_path}")
+    return pdf_paths
+
+# Function to format a table as a readable string
+def format_table(table):
+    if not table or not table[0]:
+        return ""
+    col_widths = [max(len(str(row[i] or "")) for row in table) for i in range(len(table[0]))]
+    lines = []
+    for row in table:
+        formatted_row = " | ".join(
+            str(cell or "").ljust(col_widths[i]) for i, cell in enumerate(row)
+        )
+        lines.append(formatted_row)
+    if len(lines) > 1:
+        header_separator = "-+-".join("-" * width for width in col_widths)
+        lines.insert(1, header_separator)
+    return "\n".join(lines)
+
+# Function to load PDF with text and table extraction
 def load_pdf_with_pdfplumber(pdf_path):
-    text = ""
+    documents = []
     try:
         with pdfplumber.open(pdf_path) as pdf:
-            for page in pdf.pages:
-                text += page.extract_text() or ""
+            for page_num, page in enumerate(pdf.pages, start=1):
+                text = page.extract_text()
+                if text:
+                    text_chunks = text.split('\n\n')
+                    for chunk in text_chunks:
+                        if chunk.strip():
+                            documents.append(Document(
+                                page_content=chunk.strip(),
+                                metadata={"source": pdf_path, "page": page_num, "type": "text"}
+                            ))
+                tables = page.extract_tables()
+                for i, table in enumerate(tables):
+                    table_str = format_table(table)
+                    if table_str:
+                        documents.append(Document(
+                            page_content=table_str,
+                            metadata={"source": pdf_path, "page": page_num, "type": "table"}
+                        ))
     except Exception as e:
         print(f"Error loading PDF {pdf_path} with pdfplumber: {e}")
-    return text
+    return documents
 
 # Function to extract text using OCR as fallback
 def load_pdf_with_ocr(pdf_path):
-    text = ""
+    documents = []
     try:
         images = convert_from_path(pdf_path)
-        for image in images:
-            text += pytesseract.image_to_string(image)
+        for page_num, image in enumerate(images, start=1):
+            text = pytesseract.image_to_string(image)
+            if text.strip():
+                documents.append(Document(
+                    page_content=text.strip(),
+                    metadata={"source": pdf_path, "page": page_num, "type": "text (OCR)"}
+                ))
     except Exception as e:
         print(f"Error loading PDF {pdf_path} with OCR: {e}")
-    return text
+    return documents
 
 # Initialize an empty list to hold all PDF documents
 pdf_documents = []
 
-# Loop through each PDF path and load the documents
-for pdf_path in predefined_pdf_paths:
-    if not os.path.exists(pdf_path):
-        raise FileNotFoundError(f"PDF file not found at {pdf_path}")
-    
-    pdf_text = load_pdf_with_pdfplumber(pdf_path)
-    
-    if not pdf_text.strip():
-        print(f"Warning: No valid text extracted from {pdf_path} with pdfplumber. Attempting OCR fallback.")
-        pdf_text = load_pdf_with_ocr(pdf_path)
-    
-    if not pdf_text.strip():
-        print(f"Warning: No valid text extracted from {pdf_path} even with OCR. Skipping this file.")
+# Get dynamic PDF paths and load the documents
+pdf_paths = get_pdf_paths(pdf_folder)
+for pdf_path in pdf_paths:
+    pdf_docs = load_pdf_with_pdfplumber(pdf_path)
+    if not pdf_docs:
+        print(f"Warning: No valid content extracted from {pdf_path} with pdfplumber. Attempting OCR fallback.")
+        pdf_docs = load_pdf_with_ocr(pdf_path)
+    if not pdf_docs:
+        print(f"Warning: No valid content extracted from {pdf_path} even with OCR. Skipping this file.")
         continue
-    
-    # Convert the text into a Document object
-    pdf_documents.append(Document(page_content=pdf_text, metadata={"source": pdf_path}))
+    pdf_documents.extend(pdf_docs)
 
-# Combine PDF and scraped content
+# Combine PDF content
 all_documents = pdf_documents
 
 # Split documents into chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300)
 splits = text_splitter.split_documents(all_documents)
 
-# Initialize vector store
+# Initialize vector store with batch processing
 persist_directory = "./chroma_db"
-vectorstore = Chroma.from_documents(documents=splits, embedding=embeddings, persist_directory=persist_directory)
+vectorstore = Chroma(embedding_function=embeddings, persist_directory=persist_directory)
+batch_size = 100
+for i in range(0, len(splits), batch_size):
+    batch = splits[i:i + batch_size]
+    vectorstore.add_documents(batch)
+
 retriever = vectorstore.as_retriever()
 
 # Prompts for history-aware retriever
@@ -127,6 +157,7 @@ contextualize_q_prompt = ChatPromptTemplate.from_messages([
 ])
 history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
 
+# Updated system prompt with fully escaped or removed variable references
 system_prompt = (
     "### Role\n"
     "- Primary Function: You are JAC Bot, an approachable and knowledgeable virtual assistant dedicated to answering questions about the Joint Admission Committee (JAC) Chandigarh. "
@@ -138,6 +169,11 @@ system_prompt = (
     "Maintain a courteous and approachable tone, free of jargon, and adapt to the user's level of familiarity with the admission process. "
     "Use simple and clear language to ensure understanding. "
     "If users seek specific recommendations, encourage them to provide details about their preferences, scores, or eligibility to deliver a more tailored response.\n\n"
+    "### Instructions\n"
+    "- Source Attribution: When providing an answer based on retrieved documents, include the source of the information at the end of your response. "
+    "Use the format: 'This information is retrieved from the document filename, page number (document type).' For example, 'This information is retrieved from seat_matrix.pdf, page 1 (table).' "
+    "Extract the source details from the metadata of the provided context documents, where the metadata includes keys 'source' (file path), 'page' (page number), and 'type' (e.g., 'text' or 'table'). "
+    "If multiple sources are used, list them separated by commas. If no specific document is retrieved or the information is general knowledge, omit the source attribution.\n\n"
     "### Constraints\n"
     "• Focused Assistance:\n"
     "If the user’s query goes beyond the scope of JAC Chandigarh (e.g., unrelated general education topics), gently redirect the conversation by saying:\n"
@@ -176,8 +212,8 @@ system_prompt = (
     "• Brevity and Clarity:\n"
     "Always provide short, straightforward responses that address the query directly. Break down complex answers into bite-sized steps or paragraphs for easy readability.\n\n"
     "• Professional Tone:\n"
-    "Avoid the use of humor, emojis, or overly casual language. Maintain a professional tone suitable for an academic and admissions-focused audience."
-    "\n\n{context}"
+    "Avoid the use of humor, emojis, or overly casual language. Maintain a professional tone suitable for an academic and admissions-focused audience.\n\n"
+    "{context}"
 )
 qa_prompt = ChatPromptTemplate.from_messages([
     ("system", system_prompt),
@@ -218,12 +254,26 @@ async def ask_question(data: dict):
         output_messages_key="answer"
     )
 
-    # Get the response
+    # Get the response with retrieved documents
     response = conversational_rag_chain.invoke(
         {"input": user_input},
         {"configurable": {"session_id": session_id}}
     )
     answer = response.get("answer", "Currently, this information is not available.")
+
+    # Extract source information from retrieved documents
+    retrieved_docs = response.get("context", [])
+    sources = []
+    for doc in retrieved_docs:
+        metadata = doc.metadata
+        source = metadata.get("source", "Unknown source")
+        page = metadata.get("page", "N/A")
+        doc_type = metadata.get("type", "unknown")
+        sources.append({
+            "source": os.path.basename(source),
+            "page": page,
+            "type": doc_type
+        })
 
     # Update session history
     session_history.add_user_message(user_input)
@@ -232,12 +282,13 @@ async def ask_question(data: dict):
     return JSONResponse(content={
         "session_id": session_id,
         "question": user_input,
-        "response": answer
+        "response": answer,
+        "sources": sources
     })
 
 @app.get("/inspect/{pdf_name}")
 async def inspect_pdf(pdf_name: str):
     for doc in all_documents:
         if pdf_name in doc.metadata.get("source", ""):
-            return {"content": doc.page_content[:1000]}  # Return a snippet
+            return {"content": doc.page_content[:1000]}
     raise HTTPException(status_code=404, detail="PDF not found")

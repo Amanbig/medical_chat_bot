@@ -8,7 +8,6 @@ import { ArrowRight, Loader } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { URL } from "../../../urls";
-// ChatList to display user and AI messages with animation
 import Linkify from "react-linkify"; // Install with `npm install react-linkify`
 
 // Create ChatContext to handle state
@@ -57,21 +56,87 @@ const ChatList = () => {
   const { chats } = useContext(ChatContext);
   const [expandedIndex, setExpandedIndex] = useState(null); // Track expanded messages
 
-  const renderMessage = (message) => {
-    const listPattern = /^(•|\d+\.)\s+/;
+  const renderMessage = (message, sources = []) => {
+    // Patterns for detecting list items
+    const listPatterns = [
+      /^\s*(•|\-|\*)\s+(.+)/,  // Bullet points: •, -, *
+      /^\s*(\d+\.)\s+(.+)/,   // Numbered: 1., 2., etc.
+    ];
 
-    if (listPattern.test(message)) {
-      const listItems = message.split("\n").filter((item) => item.trim());
-      return (
-        <ul className="list-disc pl-5">
-          {listItems.map((item, index) => (
-            <li key={index}>{item.replace(listPattern, "")}</li>
-          ))}
-        </ul>
-      );
-    }
+    // Split message into lines
+    const lines = message.split("\n").filter((line) => line.trim());
+    let content = [];
+    let currentList = null;
 
-    return message;
+    lines.forEach((line, index) => {
+      let matched = false;
+
+      // Check each pattern
+      for (const pattern of listPatterns) {
+        const match = line.match(pattern);
+        if (match) {
+          const [, prefix, text] = match;
+          if (!currentList || (pattern === listPatterns[0] && currentList.type !== "bullet") || (pattern === listPatterns[1] && currentList.type !== "numbered")) {
+            if (currentList) content.push(currentList);
+            currentList = { type: pattern === listPatterns[0] ? "bullet" : "numbered", items: [] };
+          }
+          currentList.items.push(text.trim());
+          matched = true;
+          break;
+        }
+      }
+
+      // If no list pattern matched, treat as paragraph
+      if (!matched) {
+        if (currentList) {
+          content.push(currentList);
+          currentList = null;
+        }
+        content.push({ type: "paragraph", text: line.trim() });
+      }
+    });
+
+    // Push the last list if it exists
+    if (currentList) content.push(currentList);
+
+    // Render the content
+    return (
+      <div>
+        {content.map((block, idx) => {
+          if (block.type === "bullet") {
+            return (
+              <ul key={idx} className="list-disc pl-6 my-2">
+                {block.items.map((item, i) => (
+                  <li key={i} className="text-sm leading-relaxed">{item}</li>
+                ))}
+              </ul>
+            );
+          } else if (block.type === "numbered") {
+            return (
+              <ol key={idx} className="list-decimal pl-6 my-2">
+                {block.items.map((item, i) => (
+                  <li key={i} className="text-sm leading-relaxed">{item}</li>
+                ))}
+              </ol>
+            );
+          } else {
+            return <p key={idx} className="text-sm my-2">{block.text}</p>;
+          }
+        })}
+        {/* Render sources if present */}
+        {sources.length > 0 && (
+          <div className="mt-2 text-xs text-gray-500">
+            <span>Sources: </span>
+            {sources.map((source, i) => (
+              <span key={i}>
+                {source.source} (Page {source.page}, {source.type})
+                {i < sources.length - 1 ? ", " : ""}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
   };
 
   const handleToggleExpand = (index) => {
@@ -113,13 +178,13 @@ const ChatList = () => {
                 </a>
               )}
             >
-              <p
+              <div
                 className={`p-2 text-sm cursor-pointer ${
                   chat.from === "user" && index !== expandedIndex ? "truncate" : ""
                 }`}
               >
-                {renderMessage(chat.value)}
-              </p>
+                {renderMessage(chat.value, chat.sources || [])}
+              </div>
             </Linkify>
             <Badge className="rounded-full">{chat.from}</Badge>
           </div>
@@ -128,7 +193,6 @@ const ChatList = () => {
     </div>
   );
 };
-
 
 // UserBar for sending messages
 const UserBar = () => {
@@ -157,16 +221,17 @@ const UserBar = () => {
         session_id: sessionId,
       });
       const aiMessage = response.data.response || "Sorry, I couldn't respond.";
+      const sources = response.data.sources || []; // Extract sources from response
 
       setChats((prevChats) => [
         ...prevChats,
-        { value: aiMessage, from: "AI Bot" },
+        { value: aiMessage, from: "AI Bot", sources: sources }, // Include sources in chat object
       ]);
     } catch (error) {
       console.error("Error:", error.response ? error.response.data : error.message);
       setChats((prevChats) => [
         ...prevChats,
-        { value: "Sorry, there was an error processing your request.", from: "AI Bot" },
+        { value: "Sorry, there was an error processing your request.", from: "AI Bot", sources: [] },
       ]);
     } finally {
       setLoading(false);
@@ -175,7 +240,7 @@ const UserBar = () => {
 
   const handleSendMessage = () => {
     if (value) {
-      setChats((prevChats) => [...prevChats, { value: value, from: "user" }]);
+      setChats((prevChats) => [...prevChats, { value: value, from: "user", sources: [] }]);
       handlePredict();
       setValue("");
     }
@@ -212,12 +277,10 @@ const UserBar = () => {
   );
 };
 
-
-
 // AI Bot with typing animation
 const AiBot = () => {
   const [displayedText, setDisplayedText] = useState("");
-  const fullText = "Hoow may I help you?";
+  const fullText = "How may I help you?";
 
   useEffect(() => {
     let currentIndex = 0;
@@ -235,7 +298,7 @@ const AiBot = () => {
 
   return (
     <motion.div
-      className="flex justify-center items-center h-full text-2xl font-bold "
+      className="flex justify-center items-center h-full text-2xl font-bold"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
