@@ -8,7 +8,7 @@ from langchain.chains import create_history_aware_retriever, create_retrieval_ch
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.vectorstores import Chroma
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain.schema import Document
+from langchain_core.documents import Document  # Use core Document
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_groq import ChatGroq
@@ -17,6 +17,12 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 import pdfplumber
 from pdf2image import convert_from_path
 import pytesseract
+import logging
+from typing import Dict, List, Any
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -40,7 +46,7 @@ app.add_middleware(
 
 # Chatbot initialization
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.1-8b-instant")
+llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile")
 
 # Specify the folder containing PDFs
 pdf_folder = "./public/public_pdf"
@@ -48,10 +54,13 @@ pdf_folder = "./public/public_pdf"
 # Function to get all PDF files from a folder dynamically
 def get_pdf_paths(folder_path):
     if not os.path.isdir(folder_path):
+        logger.error(f"Directory not found: {folder_path}")
         raise FileNotFoundError(f"Directory not found: {folder_path}")
     pdf_paths = [os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.lower().endswith('.pdf')]
     if not pdf_paths:
+        logger.warning(f"No PDF files found in directory: {folder_path}")
         raise FileNotFoundError(f"No PDF files found in directory: {folder_path}")
+    logger.info(f"Found {len(pdf_paths)} PDF files in {folder_path}")
     return pdf_paths
 
 # Function to format a table as a readable string
@@ -93,8 +102,9 @@ def load_pdf_with_pdfplumber(pdf_path):
                             page_content=table_str,
                             metadata={"source": pdf_path, "page": page_num, "type": "table"}
                         ))
+        logger.info(f"Extracted {len(documents)} documents from {pdf_path} with pdfplumber")
     except Exception as e:
-        print(f"Error loading PDF {pdf_path} with pdfplumber: {e}")
+        logger.error(f"Error loading PDF {pdf_path} with pdfplumber: {e}")
     return documents
 
 # Function to extract text using OCR as fallback
@@ -109,24 +119,31 @@ def load_pdf_with_ocr(pdf_path):
                     page_content=text.strip(),
                     metadata={"source": pdf_path, "page": page_num, "type": "text (OCR)"}
                 ))
+        logger.info(f"Extracted {len(documents)} documents from {pdf_path} with OCR")
     except Exception as e:
-        print(f"Error loading PDF {pdf_path} with OCR: {e}")
+        logger.error(f"Error loading PDF {pdf_path} with OCR: {e}")
     return documents
 
 # Initialize an empty list to hold all PDF documents
 pdf_documents = []
 
 # Get dynamic PDF paths and load the documents
-pdf_paths = get_pdf_paths(pdf_folder)
-for pdf_path in pdf_paths:
-    pdf_docs = load_pdf_with_pdfplumber(pdf_path)
-    if not pdf_docs:
-        print(f"Warning: No valid content extracted from {pdf_path} with pdfplumber. Attempting OCR fallback.")
-        pdf_docs = load_pdf_with_ocr(pdf_path)
-    if not pdf_docs:
-        print(f"Warning: No valid content extracted from {pdf_path} even with OCR. Skipping this file.")
-        continue
-    pdf_documents.extend(pdf_docs)
+try:
+    pdf_paths = get_pdf_paths(pdf_folder)
+    for pdf_path in pdf_paths:
+        pdf_docs = load_pdf_with_pdfplumber(pdf_path)
+        if not pdf_docs:
+            logger.warning(f"No valid content extracted from {pdf_path} with pdfplumber. Attempting OCR fallback.")
+            pdf_docs = load_pdf_with_ocr(pdf_path)
+        if not pdf_docs:
+            logger.warning(f"No valid content extracted from {pdf_path} even with OCR. Skipping this file.")
+            continue
+        pdf_documents.extend(pdf_docs)
+    
+    logger.info(f"Total documents extracted from all PDFs: {len(pdf_documents)}")
+except Exception as e:
+    logger.error(f"Error during PDF loading: {e}")
+    raise
 
 # Combine PDF content
 all_documents = pdf_documents
@@ -134,6 +151,7 @@ all_documents = pdf_documents
 # Split documents into chunks
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=3000, chunk_overlap=300)
 splits = text_splitter.split_documents(all_documents)
+logger.info(f"Split documents into {len(splits)} chunks")
 
 # Initialize vector store with batch processing
 persist_directory = "./chroma_db"
@@ -142,22 +160,26 @@ batch_size = 100
 for i in range(0, len(splits), batch_size):
     batch = splits[i:i + batch_size]
     vectorstore.add_documents(batch)
+    logger.info(f"Added batch {i//batch_size + 1}/{(len(splits)-1)//batch_size + 1} to vector store")
 
-retriever = vectorstore.as_retriever()
+# Use the base retriever directly since custom retriever isn't critical here
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 
 # Prompts for history-aware retriever
 contextualize_q_system_prompt = (
     "Given a chat history and the latest user question, formulate a standalone question. "
     "If the question is already standalone, return it as is."
 )
-contextualize_q_prompt = ChatPromptTemplate.from_messages([
-    ("system", contextualize_q_system_prompt),
-    MessagesPlaceholder("chat_history"),
-    ("human", "{input}"),
-])
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    messages=[
+        ("system", contextualize_q_system_prompt),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{input}"),
+    ]
+)
 history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
 
-# Updated system prompt with fully escaped or removed variable references
+# Updated system prompt
 system_prompt = (
     "### Role\n"
     "- Primary Function: You are JAC Bot, an approachable and knowledgeable virtual assistant dedicated to answering questions about the Joint Admission Committee (JAC) Chandigarh. "
@@ -176,7 +198,7 @@ system_prompt = (
     "If multiple sources are used, list them separated by commas. If no specific document is retrieved or the information is general knowledge, omit the source attribution.\n\n"
     "### Constraints\n"
     "• Focused Assistance:\n"
-    "If the user’s query goes beyond the scope of JAC Chandigarh (e.g., unrelated general education topics), gently redirect the conversation by saying:\n"
+    "If the user's query goes beyond the scope of JAC Chandigarh (e.g., unrelated general education topics), gently redirect the conversation by saying:\n"
     "\"I appreciate your interest in that topic, but I'm here to assist with questions related to JAC Chandigarh admissions. How can I help you with your admission-related query today?\"\n\n"
     "• Institute Details:\n"
     "Provide contact details for each participating institute when users ask for specific information.\n"
@@ -207,21 +229,28 @@ system_prompt = (
     "   - Contact Number: +91 1800 180 2625\n"
     "   - Address: Bhaddal, District Ropar, Punjab\n\n"
     "• Handling Unanswerable Queries:\n"
-    "If a question falls entirely outside the bot’s knowledge, respond politely and redirect the user:\n"
-    "\"I apologize, but I don’t have enough information to answer that query. I recommend reaching out to the relevant institute directly using the contact details provided or contacting the JAC Chandigarh team at jacchandigarh2024@gmail.com or 0172-2541242, 2534995 for further assistance.\"\n\n"
+    "If a question falls entirely outside the bot's knowledge, respond politely and redirect the user:\n"
+    "\"I apologize, but I don't have enough information to answer that query. I recommend reaching out to the relevant institute directly using the contact details provided or contacting the JAC Chandigarh team at jacchandigarh2024@gmail.com or 0172-2541242, 2534995 for further assistance.\"\n\n"
     "• Brevity and Clarity:\n"
     "Always provide short, straightforward responses that address the query directly. Break down complex answers into bite-sized steps or paragraphs for easy readability.\n\n"
     "• Professional Tone:\n"
     "Avoid the use of humor, emojis, or overly casual language. Maintain a professional tone suitable for an academic and admissions-focused audience.\n\n"
     "{context}"
 )
-qa_prompt = ChatPromptTemplate.from_messages([
-    ("system", system_prompt),
-    MessagesPlaceholder("chat_history"),
-    ("human", "{input}"),
-])
+qa_prompt = ChatPromptTemplate.from_messages(
+    messages=[
+        ("system", system_prompt),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{input}"),
+    ]
+)
 question_answer_chain = create_stuff_documents_chain(llm, qa_prompt)
-rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+
+# Create the retrieval chain
+rag_chain = create_retrieval_chain(
+    history_aware_retriever,
+    question_answer_chain
+)
 
 # Store chat histories for sessions
 chat_histories = {}
@@ -230,6 +259,7 @@ chat_histories = {}
 async def create_session():
     session_id = str(uuid4())
     chat_histories[session_id] = ChatMessageHistory()
+    logger.info(f"Created new session: {session_id}")
     return {"session_id": session_id}
 
 @app.post("/ask")
@@ -244,6 +274,7 @@ async def ask_question(data: dict):
         raise HTTPException(status_code=404, detail="Session ID not found.")
 
     session_history = chat_histories[session_id]
+    logger.info(f"Processing question for session {session_id}: {user_input[:50]}...")
 
     # Prepare conversational chain
     conversational_rag_chain = RunnableWithMessageHistory(
@@ -254,41 +285,54 @@ async def ask_question(data: dict):
         output_messages_key="answer"
     )
 
-    # Get the response with retrieved documents
-    response = conversational_rag_chain.invoke(
-        {"input": user_input},
-        {"configurable": {"session_id": session_id}}
-    )
-    answer = response.get("answer", "Currently, this information is not available.")
+    try:
+        # Get the response with retrieved documents
+        response = conversational_rag_chain.invoke(
+            {"input": user_input},
+            config={"configurable": {"session_id": session_id}}
+        )
+        
+        answer = response.get("answer", "Currently, this information is not available.")
+        retrieved_docs = response.get("context", [])
+        
+        # Extract source information from retrieved documents
+        sources = []
+        for doc in retrieved_docs:
+            metadata = doc.metadata
+            source = metadata.get("source", "Unknown source")
+            page = metadata.get("page", "N/A")
+            doc_type = metadata.get("type", "unknown")
+            sources.append({
+                "source": os.path.basename(source),
+                "page": page,
+                "type": doc_type
+            })
 
-    # Extract source information from retrieved documents
-    retrieved_docs = response.get("context", [])
-    sources = []
-    for doc in retrieved_docs:
-        metadata = doc.metadata
-        source = metadata.get("source", "Unknown source")
-        page = metadata.get("page", "N/A")
-        doc_type = metadata.get("type", "unknown")
-        sources.append({
-            "source": os.path.basename(source),
-            "page": page,
-            "type": doc_type
+        # Update session history
+        session_history.add_user_message(user_input)
+        session_history.add_ai_message(answer)
+        
+        logger.info(f"Successfully processed question for session {session_id}")
+        
+        return JSONResponse(content={
+            "session_id": session_id,
+            "question": user_input,
+            "response": answer,
+            "sources": sources
         })
-
-    # Update session history
-    session_history.add_user_message(user_input)
-    session_history.add_message({"role": "assistant", "content": answer})
-
-    return JSONResponse(content={
-        "session_id": session_id,
-        "question": user_input,
-        "response": answer,
-        "sources": sources
-    })
+        
+    except Exception as e:
+        logger.error(f"Error processing question for session {session_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error processing your question: {str(e)}")
 
 @app.get("/inspect/{pdf_name}")
 async def inspect_pdf(pdf_name: str):
     for doc in all_documents:
         if pdf_name in doc.metadata.get("source", ""):
             return {"content": doc.page_content[:1000]}
+    logger.warning(f"PDF not found: {pdf_name}")
     raise HTTPException(status_code=404, detail="PDF not found")
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "document_count": len(all_documents)}
