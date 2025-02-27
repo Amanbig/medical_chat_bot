@@ -46,7 +46,7 @@ app.add_middleware(
 
 # Chatbot initialization
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile")
+llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="gemma2-9b-it")
 
 # Specify the folder containing PDFs
 pdf_folder = "./public/public_pdf"

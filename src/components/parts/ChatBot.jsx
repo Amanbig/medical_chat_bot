@@ -1,12 +1,13 @@
 "use strict";
 
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext, createContext, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { Button } from "../ui/button";
-import { ArrowRight, Loader, Copy, Check } from "lucide-react";
+import { ArrowRight, Loader, Copy, Check, Send, Bot, UserCircle, RefreshCcw, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip } from "@/components/ui/tooltip";
 import { URL } from "../../../urls";
 import Linkify from "react-linkify";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -17,40 +18,110 @@ const ChatContext = createContext();
 
 const ChatBot = () => {
   const [chats, setChats] = useState([]);
-  const showAiBot = chats.length === 0;
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const chatContainerRef = useRef(null);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [chats]);
 
   return (
     <ChatContext.Provider value={{ chats, setChats }}>
-      <div className="h-screen flex flex-col justify-center text-center p-8">
-        <div className="flex justify-center text-center mt-5">
+      <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+        <header className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+          <div className="flex items-center gap-2">
+            <Bot className="text-blue-500" />
+            <h1 className="text-xl font-semibold">JacBot</h1>
+          </div>
+        </header>
+        
+        <div 
+          ref={chatContainerRef}
+          className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600"
+        >
           <AnimatePresence>
-            {showAiBot && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              >
-                <AiBot />
-              </motion.div>
+            {isFirstLoad && chats.length === 0 ? (
+              <WelcomeScreen setIsFirstLoad={setIsFirstLoad} />
+            ) : (
+              <ChatList />
             )}
           </AnimatePresence>
         </div>
-        {!showAiBot && (
-          <motion.div
-            className="flex-1 overflow-y-auto"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <ChatList />
-          </motion.div>
-        )}
-        <div>
-          <UserBar />
-        </div>
+        
+        <UserBar />
       </div>
     </ChatContext.Provider>
+  );
+};
+
+// Welcome screen component
+const WelcomeScreen = ({ setIsFirstLoad }) => {
+  const suggestions = [
+    "Tell me about Councelling",
+    "How can I get admission?",
+    "Write a short details about colleges participating in JAC",
+    "What is the eligibility criteria for admission?",
+  ];
+  
+  const { setChats } = useContext(ChatContext);
+  
+  const handleSuggestionClick = (suggestion) => {
+    setChats([{ value: suggestion, from: "user" }]);
+    setIsFirstLoad(false);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setChats(prev => [...prev, { 
+        value: `I'm processing your question about "${suggestion}"...`, 
+        from: "AI Bot" 
+      }]);
+    }, 500);
+  };
+
+  return (
+    <motion.div
+      className="flex flex-col items-center justify-center h-full max-w-2xl mx-auto py-10 px-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 w-full">
+        <div className="flex justify-center mb-6">
+          <div className="p-4 bg-blue-100 dark:bg-blue-900 rounded-full">
+            <Bot size={40} className="text-blue-600 dark:text-blue-300" />
+          </div>
+        </div>
+        
+        <h2 className="text-2xl font-bold text-center mb-2">Welcome to JacBot</h2>
+        <p className="text-gray-600 dark:text-gray-300 text-center mb-8">
+          I'm here to help with information, details, and more.
+          What would you like to know today?
+        </p>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          {suggestions.map((suggestion, index) => (
+            <button
+              key={index}
+              onClick={() => handleSuggestionClick(suggestion)}
+              className="text-left p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <p className="text-sm font-medium">{suggestion}</p>
+            </button>
+          ))}
+        </div>
+        
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          Type your own question below or select a suggestion to get started.
+        </p>
+      </div>
+    </motion.div>
   );
 };
 
@@ -188,6 +259,21 @@ const ChatList = () => {
     let currentCodeBlock = null;
     let currentBlockquote = null;
     let isInCodeBlock = false;
+
+    const uniqueSources = sources.reduce((acc, curr) => {
+      const existing = acc.find(s => s.source === curr.source);
+      if (existing) {
+        if (curr.page && !existing.pages.includes(curr.page)) {
+          existing.pages.push(curr.page);
+        }
+      } else {
+        acc.push({
+          source: curr.source,
+          pages: curr.page ? [curr.page] : []
+        });
+      }
+      return acc;
+    }, []);
     
     // Add any pending list, table or code block to content
     const finalizeCurrent = () => {
@@ -448,7 +534,12 @@ const ChatList = () => {
               
             case "codeBlock":
               return (
-                <div key={idx} className="my-2 relative group">
+                <div key={idx} className="my-2 relative group rounded-md overflow-hidden">
+                  {block.language && (
+                    <div className="absolute left-2 top-2 px-2 py-1 bg-gray-700 rounded text-xs text-gray-300">
+                      {block.language}
+                    </div>
+                  )}
                   <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={(e) => {
@@ -458,6 +549,7 @@ const ChatList = () => {
                         setTimeout(() => setCopiedIndex(null), 2000);
                       }}
                       className="p-1 rounded bg-gray-700 hover:bg-gray-600 text-white"
+                      aria-label="Copy code"
                     >
                       {copiedIndex === idx ? <Check size={16} /> : <Copy size={16} />}
                     </button>
@@ -465,7 +557,7 @@ const ChatList = () => {
                   <SyntaxHighlighter 
                     language={block.language || 'text'} 
                     style={vscDarkPlus}
-                    customStyle={{ borderRadius: '0.375rem' }}
+                    customStyle={{ borderRadius: '0.375rem', marginTop: '0', marginBottom: '0' }}
                     wrapLongLines={true}
                   >
                     {block.code}
@@ -492,12 +584,12 @@ const ChatList = () => {
               if (block.headers || block.rows) { // Table
                 return (
                   <div key={idx} className="overflow-x-auto my-4">
-                    <table className="min-w-full border-collapse border border-gray-300">
+                    <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-700">
                       {block.headers && (
                         <thead>
-                          <tr className="bg-gray-100">
+                          <tr className="bg-gray-100 dark:bg-gray-800">
                             {block.headers.map((header, i) => (
-                              <th key={i} className="border border-gray-300 px-4 py-2 text-sm font-semibold text-left">
+                              <th key={i} className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm font-semibold text-left">
                                 <Linkify
                                   componentDecorator={(href, text, key) => (
                                     <a href={href} key={key} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
@@ -514,9 +606,9 @@ const ChatList = () => {
                       )}
                       <tbody>
                         {block.rows.map((row, i) => (
-                          <tr key={i} className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                          <tr key={i} className={i % 2 === 0 ? "bg-gray-50 dark:bg-gray-900" : "bg-white dark:bg-gray-800"}>
                             {row.map((cell, j) => (
-                              <td key={j} className="border border-gray-300 px-4 py-2 text-sm">
+                              <td key={j} className="border border-gray-300 dark:border-gray-700 px-4 py-2 text-sm">
                                 <Linkify
                                   componentDecorator={(href, text, key) => (
                                     <a href={href} key={key} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
@@ -540,57 +632,100 @@ const ChatList = () => {
         })}
         
         {/* Render sources if present */}
-        {sources.length > 0 && (
-          <div className="mt-2 text-xs text-gray-500">
-            <span>Sources: </span>
-            {sources.map((source, i) => (
-              <span key={i}>
-                {source.source} 
-                {source.page && ` (Page ${source.page})`}
-                {source.type && `, ${source.type}`}
-                {i < sources.length - 1 ? ", " : ""}
-              </span>
-            ))}
+        {uniqueSources.length > 0 && (
+        <div className="mt-4 border-t pt-2 dark:border-gray-700">
+          <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">Sources:</p>
+          <div className="flex flex-wrap gap-2">
+            {uniqueSources.map((source, i) => {
+              const pdfUrl = source.pages.length > 0 
+                ? `/public_pdf/${source.source}#page=${source.pages[0]}`
+                : `/public_pdf/${source.source}`;
+
+              return (
+                <a
+                  key={i}
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-xs text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                  title={`Open ${source.source}${source.pages.length > 0 ? ` at page ${source.pages[0]}` : ''}`}
+                >
+                  <ExternalLink size={12} />
+                  <span className="truncate max-w-[130px]">
+                    {source.source}
+                    {source.pages.length > 0 && (
+                      <span className="ml-1 opacity-80">
+                        (p.{source.pages.sort((a, b) => a - b).join(', ')})
+                      </span>
+                    )}
+                  </span>
+                </a>
+              );
+            })}
           </div>
-        )}
+        </div>
+      )}
       </div>
     );
   };
 
-  const handleToggleExpand = (index) => {
-    setExpandedIndex(index === expandedIndex ? null : index);
-  };
-
   return (
-    <div className="overflow-y-auto p-4">
+    <div className="max-w-3xl mx-auto">
       {chats.map((chat, index) => (
         <motion.div
           key={index}
-          className={`flex m-8 ${chat.from === "user" ? "justify-end" : "justify-start"}`}
-          initial={chat.from === "user" ? { opacity: 0, x: 1 } : { opacity: 0, scale: 0 }}
-          animate={chat.from === "user" ? { opacity: 1, x: 0 } : { opacity: 1, scale: 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 120,
-            damping: 20,
-          }}
+          className={`mb-4 ${expandedIndex === index ? 'z-10' : ''}`}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
         >
-          <div
-            className={`${
-              chat.from === "user" ? "max-w-xs w-full" : "w-full"
-            } shadow-lg rounded-xl p-2 dark:border-2 dark:border-white border-black border-4 ${
-              chat.from === "user" ? "text-right" : "text-left"
-            }`}
-            onClick={() => handleToggleExpand(index)}
-          >
-            <div
-              className={`p-2 text-sm ${
-                chat.from === "user" && index !== expandedIndex ? "truncate" : ""
+          <div className={`flex items-start gap-3 ${chat.from === "user" ? "justify-end" : ""}`}>
+            {/* Avatar */}
+            {chat.from !== "user" && (
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mt-1">
+                <Bot size={16} className="text-blue-600 dark:text-blue-300" />
+              </div>
+            )}
+            
+            {/* Message bubble */}
+            <div 
+              className={`relative group rounded-lg p-3 max-w-[85%] ${
+                chat.from === "user" 
+                  ? "bg-blue-500 text-white" 
+                  : "bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700"
               }`}
             >
               {renderMessage(chat.value, chat.sources || [])}
+              
+              {/* Message actions */}
+              <div className={`absolute -top-3 ${chat.from === "user" ? "left-2" : "right-2"} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                <div className="flex gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(chat.value);
+                      // Show copied notification
+                    }}
+                    className="p-1 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                    aria-label="Copy message"
+                  >
+                    <Copy size={14} />
+                  </button>
+                </div>
+              </div>
             </div>
-            <Badge className="rounded-full">{chat.from}</Badge>
+            
+            {/* User avatar */}
+            {chat.from === "user" && (
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center mt-1">
+                <UserCircle size={16} className="text-gray-600 dark:text-gray-300" />
+              </div>
+            )}
+          </div>
+          
+          {/* Timestamp (optional) */}
+          <div className={`text-xs text-gray-500 mt-1 ${chat.from === "user" ? "text-right mr-11" : "ml-11"}`}>
+            {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
           </div>
         </motion.div>
       ))}
@@ -604,6 +739,7 @@ const UserBar = () => {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const { chats, setChats } = useContext(ChatContext);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     // Initialize the chat session on component mount
@@ -617,6 +753,9 @@ const UserBar = () => {
     };
 
     fetchSession();
+    
+    // Focus the input on component mount
+    if (inputRef.current) inputRef.current.focus();
   }, []);
 
   const handlePredict = async () => {
@@ -624,99 +763,102 @@ const UserBar = () => {
 
     setLoading(true);
     try {
-      setChats((prevChats) => [...prevChats, { value, from: "user", sources: [] }]);
+      const userMessage = value.trim();
+      setChats((prevChats) => [...prevChats, { value: userMessage, from: "user", sources: [] }]);
+      setValue("");
+
+      // Show typing indicator
+      const typingId = Date.now();
+      setChats(prevChats => [
+        ...prevChats, 
+        { id: typingId, value: "...", from: "AI Bot", isTyping: true }
+      ]);
 
       const response = await axios.post(`${URL}/ask`, {
-        question: value,
+        question: userMessage,
         session_id: sessionId,
       });
       
       const aiMessage = response.data.response || "Sorry, I couldn't respond.";
       const sources = response.data.sources || [];
+      // Remove typing indicator and add the real response
+      setChats(prevChats => {
+        const filteredChats = prevChats.filter(c => c.id !== typingId);
+        return [...filteredChats, { 
+          value: aiMessage, 
+          from: "AI Bot",
+          sources: sources
+        }];
+      });
 
-      setChats((prevChats) => [
-        ...prevChats,
-        { value: aiMessage, from: "AI Bot", sources: sources },
-      ]);
-      
-      setValue("");
     } catch (error) {
-      console.error("Error:", error.response ? error.response.data : error.message);
-      setChats((prevChats) => [
-        ...prevChats,
-        { value: "Sorry, there was an error processing your request.", from: "AI Bot", sources: [] },
-      ]);
+      console.error("Error sending message:", error);
+      setChats(prevChats => {
+        const filteredChats = prevChats.filter(c => !c.isTyping);
+        return [...filteredChats, { 
+          value: "Sorry, there was an error processing your request. Please try again.", 
+          from: "AI Bot" 
+        }];
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendMessage = () => {
-    if (value.trim()) {
-      handlePredict();
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (value.trim()) {
+        handlePredict();
+      }
     }
   };
 
+  const handleClearChat = () => {
+    setChats([]);
+  };
+
   return (
-    <div className="p-4 mt-auto">
-      <div className="flex justify-center text-center gap-2">
-        <Input
-          type="text"
-          placeholder="Type your message..."
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSendMessage()}
-          disabled={loading}
-          className="flex-grow transition-all duration-150 ease-in-out dark:border-2 dark:border-white border-4 bg-gray-200 dark:bg-gray-900 border-black p-6"
-        />
-        <div className="rounded-full p-2">
-          {!loading ? (
+    <div className="border-t dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+      <div className="max-w-3xl mx-auto">
+        {chats.length > 0 && (
+          <div className="flex justify-center mb-3">
             <Button
-              className="flex justify-center text-center rounded-full transition-all duration-150"
-              onClick={handleSendMessage}
-              disabled={!value.trim()}
+              variant="ghost"
+              size="sm"
+              onClick={handleClearChat}
+              className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
-              <ArrowRight />
+              <RefreshCcw size={14} className="mr-1" />
+              New Chat
             </Button>
-          ) : (
-            <div className="flex justify-center items-center">
-              <Loader className="animate-spin w-10 h-10" />
-            </div>
-          )}
+          </div>
+        )}
+        
+        <div className="relative">
+          <Input
+            ref={inputRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your message..."
+            className="pr-12 py-6 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-full"
+            disabled={loading}
+          />
+          <Button
+            onClick={handlePredict}
+            disabled={!value.trim() || loading}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full p-0"
+          >
+            {loading ? <Loader size={14} className="animate-spin" /> : <Send size={14} />}
+          </Button>
+        </div>
+        
+        <div className="text-xs text-center mt-2 text-gray-500 dark:text-gray-400">
+          JacBot may provide inaccurate information. Verify important facts.
         </div>
       </div>
     </div>
-  );
-};
-
-// AI Bot with typing animation
-const AiBot = () => {
-  const [displayedText, setDisplayedText] = useState("");
-  const fullText = "How may I help you?";
-
-  useEffect(() => {
-    let currentIndex = 0;
-    const typingInterval = setInterval(() => {
-      if (currentIndex < fullText.length) {
-        setDisplayedText((prev) => prev + fullText[currentIndex]);
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 100);
-
-    return () => clearInterval(typingInterval);
-  }, []);
-
-  return (
-    <motion.div
-      className="flex justify-center items-center h-full text-2xl font-bold"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {displayedText}
-    </motion.div>
   );
 };
 

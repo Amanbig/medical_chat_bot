@@ -18,7 +18,7 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <Menu/>
+            {/* <Menu/> */}
           {children}
           <div className="p-10"></div>
           <Footer/>
